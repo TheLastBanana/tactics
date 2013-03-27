@@ -1,4 +1,4 @@
-import pygame
+import pygame, sys
 from pygame.sprite import Sprite
 from collections import namedtuple
 
@@ -7,9 +7,9 @@ Tile = namedtuple('Tile', ['sprite_id', 'passable'])
 
 # a dictionary of tile IDs associated with their type data
 tile_types = {
-0: Tile(0, True),       # default
-1: Tile(1, False),      # wall
-2: Tile(2, False)       # water
+    0:  Tile(0, True),       # default
+    1:  Tile(1, False),      # wall
+    2:  Tile(2, False)       # water
 }
 
 class TileMap(Sprite):
@@ -34,7 +34,7 @@ class TileMap(Sprite):
         self._map_height = map_height
         self._tiles = []
         for i in range(self._tile_count()):
-            self._tiles.append(int(random.random() * 3))
+            self._tiles.append(0)
         
         Sprite.__init__(self)
         
@@ -45,7 +45,6 @@ class TileMap(Sprite):
         """
         Overrides the default update function for sprites. This updates the image.
         """
-        
         # clear the image
         self.image.fill((0, 0, 0, 0))
         
@@ -63,6 +62,36 @@ class TileMap(Sprite):
             # draw the ti.e
             self.image.blit(self._sprite_sheet, (x, y), area)
             
+    def load_from_file(self, filename):
+        """
+        Loads tile data in from a given file.
+        The file should be space-separated.
+        """
+        tile_file = open(filename, 'r')
+        
+        lines = tile_file.readlines()
+        if len(lines) < self._map_height:
+                raise Exception("Expected {} rows of tiles, but got {}".format(self._map_height, len(lines)))
+        
+        # this will store the new set of tiles temporarily so that we can revert in case the read operation fails
+        new_tiles = []
+        
+        for line in lines:
+            line = line.rstrip()
+            line = line.split(' ')
+            
+            # there should be map_width tiles per line
+            if len(line) < self._map_width:
+                raise Exception("Expected {} tiles per line, but got {}".format(self._map_width, len(line)))
+            
+            # add all the tiles
+            for c in line:
+                new_tiles.append(int(c))
+                
+        tile_file.close()
+        
+        # we loaded in the file properly, so copy it over to tiles
+        self._tiles = new_tiles[:]
         
     def _tile_count(self):
         """
