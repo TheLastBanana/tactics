@@ -1,8 +1,8 @@
 import sys, pygame
-from pygame.sprite import RenderPlain
+from pygame.sprite import LayeredUpdates
 import tiles
 
-class GUI(RenderPlain):
+class GUI(LayeredUpdates):
     # number of GUI instances
     num_instances = 0
 
@@ -13,7 +13,7 @@ class GUI(RenderPlain):
         bg_color: the background color
         """
         
-        RenderPlain.__init__(self)
+        LayeredUpdates.__init__(self)
         
         if GUI.num_instances != 0:
             raise Exception("GUI: can only have one instance of a simulation")
@@ -28,6 +28,6 @@ class GUI(RenderPlain):
         Render the display.
         """
         self.screen.fill(self.bg_color)
-        RenderPlain.update(self)
-        RenderPlain.draw(self, self.screen)
+        LayeredUpdates.update(self)
+        LayeredUpdates.draw(self, self.screen)
         pygame.display.flip()
