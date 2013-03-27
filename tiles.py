@@ -1,7 +1,6 @@
 import pygame
 from pygame.sprite import Sprite
 from collections import namedtuple
-from renderable import Renderable
 
 # A container class which stores information about a tile.
 Tile = namedtuple('Tile', ['sprite_id', 'passable'])

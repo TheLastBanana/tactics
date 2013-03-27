@@ -1,6 +1,6 @@
 import sys, pygame
 from pygame.sprite import RenderPlain
-import tiles, renderable
+import tiles
 
 class GUI(RenderPlain):
     # number of GUI instances
