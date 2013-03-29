@@ -36,6 +36,7 @@ class TileMap(Sprite):
         self._map_width = map_width
         self._map_height = map_height
         self._tiles = []
+        self._grid_color = (0, 0, 0, 64)
         for i in range(self._tile_count()):
             self._tiles.append(0)
         
@@ -81,8 +82,15 @@ class TileMap(Sprite):
             # determine which subsection to draw based on the sprite id
             area = pygame.Rect(tile_id * self._tile_width, 0, self._tile_width, self._tile_height)
             
-            # draw the ti.e
+            # draw the tile
             self.image.blit(self._sprite_sheet, (x, y), area)
+            
+        # draw the grid
+        for x in range(0, self._map_width * self._tile_width, self._tile_width):
+            pygame.gfxdraw.vline(self.image, x, 0, self._map_height * self._tile_height, self._grid_color)
+        for y in range(0, self._map_height * self._tile_height, self._tile_height):
+            pygame.gfxdraw.hline(self.image, 0, self._map_width * self._tile_width, y, self._grid_color)
+                
             
         # draw the debug path
         for c in self.test_path:
