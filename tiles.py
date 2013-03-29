@@ -1,4 +1,5 @@
 import pygame, sys
+import pygame.gfxdraw
 from pygame.sprite import Sprite
 from collections import namedtuple
 
@@ -27,6 +28,8 @@ class TileMap(Sprite):
         """
         import random
         
+        self.test_path = self.find_path((0, 0), (10, 10))
+        
         self._sprite_sheet = pygame.image.load(sheet_name)
         self._tile_width = tile_width
         self._tile_height = tile_height
@@ -41,6 +44,24 @@ class TileMap(Sprite):
         self.image = pygame.Surface((self._tile_width * self._map_width, self._tile_height * self._map_height))
         self.rect = self.image.get_rect()
         
+    def _tile_count(self):
+        """
+        Returns the number of tiles on the map.
+        """
+        return self._map_width * self._map_height
+        
+    def _tile_position(self, index):
+        """
+        Returns a tile's coordinates in tile units within the map given its index in the list.
+        """
+        return (index % self._map_width, index // self._map_height)
+        
+    def _tile_index(self, coords):
+        """
+        Returns a tile's index in the list given its tile coordinates in tile units.
+        """
+        return coords[1] * self._map_width + coords[0]
+        
     def update(self):
         """
         Overrides the default update function for sprites. This updates the image.
@@ -53,14 +74,20 @@ class TileMap(Sprite):
             tile_id = tile_types[self._tiles[i]].sprite_id
             
             # get its position from its index in the list
-            x = (i % self._map_width) * self._tile_width
-            y = (i // self._map_height) * self._tile_height
+            x, y = self._tile_position(i)
+            x *= self._tile_width
+            y *= self._tile_height
             
             # determine which subsection to draw based on the sprite id
             area = pygame.Rect(tile_id * self._tile_width, 0, self._tile_width, self._tile_height)
             
             # draw the ti.e
             self.image.blit(self._sprite_sheet, (x, y), area)
+            
+        # draw the debug path
+        for c in self.test_path:
+            tile_rect = pygame.Rect(c[0] * self._tile_width, c[1] * self._tile_height, self._tile_width, self._tile_height)
+            pygame.gfxdraw.box(self.image, tile_rect, (255, 0, 0, 150))
             
     def load_from_file(self, filename):
         """
@@ -93,8 +120,8 @@ class TileMap(Sprite):
         # we loaded in the file properly, so copy it over to tiles
         self._tiles = new_tiles[:]
         
-    def _tile_count(self):
+    def find_path(self, start, end):
         """
-        Returns the number of tiles on the map.
+        Returns the path between two points as a list of tile coordinates using the A* algorithm.
         """
-        return self._map_width * self._map_height
+        return [start, end]
