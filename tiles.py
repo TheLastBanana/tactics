@@ -1,5 +1,6 @@
 import pygame, sys
 import pygame.gfxdraw
+import pqueue
 from pygame.sprite import Sprite
 from collections import namedtuple
 
@@ -12,6 +13,19 @@ tile_types = {
     1:  Tile(1, False),      # wall
     2:  Tile(2, False)       # water
 }
+
+def manhattan_dist(a, b):
+    """
+    Returns the Manhattan distance between two points.
+    
+    >>> manhattan_dist((0, 0), (5, 5))
+    10
+    >>> manhattan_dist((0, 5), (10, 7))
+    12
+    >>> manhattan_dist((12, 9), (2, 3))
+    16
+    """
+    return abs(a[0] - b[0] + a[1] - b[1])
 
 class TileMap(Sprite):
     """
@@ -26,10 +40,6 @@ class TileMap(Sprite):
         map_width: the width of map, in tiles
         map_height: the height of the map, in tiles
         """
-        import random
-        
-        self.test_path = self.find_path((0, 0), (10, 10))
-        
         self._sprite_sheet = pygame.image.load(sheet_name)
         self._tile_width = tile_width
         self._tile_height = tile_height
@@ -57,11 +67,30 @@ class TileMap(Sprite):
         """
         return (index % self._map_width, index // self._map_height)
         
+    def _tile_exists(self, coords):
+        """
+        Returns true if a tile exists, or false if it doesn't
+        """
+        return not (coords[0] < 0 or coords[0] >= self._map_width or coords[1] < 0 or coords[1] >= self._map_height)
+        
     def _tile_index(self, coords):
         """
         Returns a tile's index in the list given its tile coordinates in tile units.
+        Returns -1 if the provided coordinates are invalid
         """
+        if not self._tile_exists(coords): return -1
+        
         return coords[1] * self._map_width + coords[0]
+        
+    def is_passable(self, coords):
+        """
+        Returns true if a given tile is passable, and false otherwise.
+        """
+        if not self._tile_exists(coords): return False
+        
+        index = self._tile_index(coords)
+        
+        return tile_types[self._tiles[index]].passable
         
     def update(self):
         """
@@ -90,7 +119,7 @@ class TileMap(Sprite):
             pygame.gfxdraw.vline(self.image, x, 0, self._map_height * self._tile_height, self._grid_color)
         for y in range(0, self._map_height * self._tile_height, self._tile_height):
             pygame.gfxdraw.hline(self.image, 0, self._map_width * self._tile_width, y, self._grid_color)
-                
+        
             
         # draw the debug path
         for c in self.test_path:
@@ -127,9 +156,69 @@ class TileMap(Sprite):
         
         # we loaded in the file properly, so copy it over to tiles
         self._tiles = new_tiles[:]
+            
+        self.test_path = self.find_path((0, 0), (21, 15))
         
-    def find_path(self, start, end):
+    def find_path(self, start, end, cost = lambda x: 1):
         """
         Returns the path between two points as a list of tile coordinates using the A* algorithm.
+        If no path could be found, an empty list is returned.
+        
+        Code based on algorithm described in http://www.policyalmanac.org/games/aStarTutorial.htm
         """
-        return [start, end]
+        # tiles to check (tuples of x, y)
+        todo = pqueue.PQueue()
+        todo.update(start, 0)
+        
+        # tiles we've been to
+        visited = set()
+        
+        # associated G and H costs for each tile (tuples of G, H)
+        costs = {}
+        
+        # parents for each tile
+        parents = {}
+        
+        while todo and (end not in visited):
+            cur, c = todo.pop_smallest()
+            x, y = cur
+            visited.add(cur)
+            
+            # check neighbours
+            neighbours = [
+                (x + 1, y),
+                (x - 1, y),
+                (x, y + 1),
+                (x, y - 1)
+            ]
+            for n in neighbours:
+                # skip it if it doesn't exist, if we've already checked it, or if it isn't passable
+                if (not self._tile_exists(n)) or (n in visited) or (not self.is_passable(n)): continue
+                
+                # we haven't looked at this tile yet, so calculate its costs
+                if n not in todo:
+                    g, h = c + cost(cur), manhattan_dist(n, end)
+                    costs[n] = (g, h)
+                    parents[n] = cur
+                    todo.update(n, g + h)
+                else:
+                    # if we've found a better path, update it
+                    g, h = costs[n]
+                    if c + cost(cur) < g:
+                        g = c + cost(cur)
+                        todo.update(n, g + h)
+                        costs[n] = (g, h)
+                        parents[n] = cur
+        
+        if end not in visited:
+            return []
+        
+        # build the path backward
+        path = []
+        while end != start:
+            path.append(end)
+            end = parents[end]
+        path.append(start)
+        path.reverse()
+        
+        return path
