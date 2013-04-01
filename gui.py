@@ -31,8 +31,8 @@ class GUI(LayeredUpdates):
         self.bg_color = bg_color
 
         self.map = tiles.TileMap(self.screen, "assets/tiles.png", 20, 20, 30, 30)
-        self.map.load_from_file("maps/empty.map")
-        self.map.set_highlight((0, 0, 255, 150), self.map.find_path((0, 19), (29, 0)))
+        self.map.load_from_file("maps/basic.map")
+        self.map.set_highlight((255, 0, 0, 150), self.map.find_path((0, 0), (29, 29)))
         self.add(self.map)
 
         #Not line height, actually font size, but conveniently the same thing

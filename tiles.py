@@ -24,8 +24,10 @@ def manhattan_dist(a, b):
     12
     >>> manhattan_dist((12, 9), (2, 3))
     16
+    >>> manhattan_dist((0, 5), (5, 0))
+    10
     """
-    return abs(a[0] - b[0] + a[1] - b[1])
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 def squared_dist(a, b):
     """
@@ -271,7 +273,7 @@ class TileMap(Sprite):
         visited = set()
         
         # associated G and H costs for each tile (tuples of G, H)
-        costs = {}
+        costs = { start: (0, manhattan_dist(start, end)) }
         
         # parents for each tile
         parents = {}
@@ -285,30 +287,33 @@ class TileMap(Sprite):
             
             # check neighbours
             neighbours = [
+                (x, y - 1),
                 (x + 1, y),
                 (x - 1, y),
-                (x, y + 1),
-                (x, y - 1)
+                (x, y + 1)
             ]
             for n in neighbours:
                 # skip it if it doesn't exist, if we've already checked it, or if it isn't passable
-                if (not self._tile_exists(n)) or (n in visited) or (not self.is_passable(n)): continue
+                if (not self._tile_exists(n)) or (n in visited) or (not self.is_passable(n)):
+                    continue
                 
-                # we haven't looked at this tile yet, so calculate its costs
                 if n not in todo:
-                    g, h = c + cost(cur), manhattan_dist(n, end)
+                    # we haven't looked at this tile yet, so calculate its costs
+                    g, h = costs[cur][0] + cost(cur), manhattan_dist(n, end)
                     costs[n] = (g, h)
                     parents[n] = cur
                     todo.update(n, g + h)
                 else:
                     # if we've found a better path, update it
                     g, h = costs[n]
-                    if c + cost(cur) < g:
-                        g = c + cost(cur)
+                    new_g = costs[cur][0] + cost(cur)
+                    if new_g < g:
+                        g = new_g
                         todo.update(n, g + h)
                         costs[n] = (g, h)
                         parents[n] = cur
         
+        # we didn't find a path
         if end not in visited:
             return []
         
