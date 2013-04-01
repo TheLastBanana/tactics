@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, math
 import pygame.gfxdraw
 import pqueue
 from pygame.sprite import Sprite
@@ -150,6 +150,16 @@ class TileMap(Sprite):
         if not self._tile_exists(coords): return -1
         
         return coords[1] * self._map_width + coords[0]
+        
+    def tile_coords(self, screen_coords):
+        """
+        Returns the tile coordinates within this TileMap that the given screen coordinates fall into.
+        """
+        x, y = screen_coords
+        return (
+            math.floor((x - self.rect.left) / self._tile_width),
+            math.floor((y - self.rect.top) / self._tile_height)
+        )
         
     def is_passable(self, coords):
         """

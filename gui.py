@@ -62,9 +62,15 @@ class GUI(LayeredUpdates):
         #title for tile section
         self.draw_bar_title("TILE INFO", line_num)
         line_num += 1
+        
+        #Tile coordinates
+        mouse_pos = pygame.mouse.get_pos()
+        coords = self.map.tile_coords(mouse_pos)
+        self.draw_bar_text("Coordinates: {}".format(coords), line_num)
+        line_num += 1
 
         #Is the tile passable?
-        self.draw_bar_text("Passable: {}".format(True), line_num)
+        self.draw_bar_text("Passable: {}".format(self.map.is_passable(coords)), line_num)
         line_num += 1
 
         #divider
@@ -97,7 +103,7 @@ class GUI(LayeredUpdates):
         """
         Draws a title at a specified line number with the specified text.
         """
-        title_text = self.font.render("UNIT INFO", True, (0,0,0))
+        title_text = self.font.render(text, True, (0,0,0))
         self.screen.blit(title_text, (MAP_WIDTH + CENTER - (title_text.get_width()/2), FONT_SIZE * line_num + PAD))
 
     def draw_bar_div_line(self, line_num):
