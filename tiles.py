@@ -27,6 +27,70 @@ def manhattan_dist(a, b):
     """
     return abs(a[0] - b[0] + a[1] - b[1])
 
+def squared_dist(a, b):
+    """
+    Returns the squared distance "as the crow flies" between two points.
+    
+    >>> squared_dist((0, 0), (5, 5)) == 50
+    True
+    >>> squared_dist((0, 5), (10, 7)) == 135
+    True
+    >>> squared_dist((12, 9), (2, 3)) == 136
+    True
+    """
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    return dx * dx + dy * dy    
+    
+def squared_segment_dist(p, a, b):
+    """
+    Returns the distance between a point p and a line segment between
+    the points a and b.
+    """
+    len2 = squared_dist(a, b)
+    # If the segment is actually a point, our job is a lot easier!
+    if len2 == 0: return squared_dist(p, a)
+    # Our line is a + t * (b - a)
+    # The t at which p is closest is when the vector (a, p) is projected
+    # onto the vector (a, b) (dot product)
+    t = ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / len2
+    if t < 0: return squared_dist(p, a) # Beyond point a
+    if t > 1: return squared_dist(p, a) # Beyond point b
+    close_point = (
+        a[0] + t * (b[0] - a[0]),
+        a[1] + t * (b[1] - a[1])
+    )
+    return squared_dist(p, close_point)
+    
+def compare_tile(a, b, start, end):
+    """
+    Picks the best tile to use. This is used in case of a tie in the
+    priority queue. Returns True if choosing tile a, or False for tile b.
+    The tile with the closest slope to the slope between start and end
+    will be given priority. If there's still a tie, the tile with the
+    lowest Y is chosen. Finally, if that fails, the tile with the lowest
+    X is chosen.
+    """
+    dist_a = squared_segment_dist(a, start, end)
+    dist_b = squared_segment_dist(b, start, end)
+    
+    # Choose the lowest slope difference
+    if dist_a < dist_b:
+        return True
+    elif dist_a > dist_b:
+        return False
+    else:
+        # Still a tie - choose lowest Y
+        if a[1] < b[1]:
+            return True
+        elif a[1] > b[1]:
+            return False
+        else:
+            # Still a tie - choose lowest X
+            if a[0] < b[0]:
+                return True
+            else:
+                return False
+
 class TileMap(Sprite):
     """
     A class which renders a grid of tiles from a spritesheet.
@@ -157,7 +221,7 @@ class TileMap(Sprite):
         # we loaded in the file properly, so copy it over to tiles
         self._tiles = new_tiles[:]
             
-        self.test_path = self.find_path((0, 0), (21, 15))
+        self.test_path = self.find_path((0, 29), (0, 29))
         
     def find_path(self, start, end, cost = lambda x: 1):
         """
@@ -180,6 +244,8 @@ class TileMap(Sprite):
         parents = {}
         
         while todo and (end not in visited):
+            todo.tie_breaker = lambda a,b: compare_tile(a, b, start, end)
+        
             cur, c = todo.pop_smallest()
             x, y = cur
             visited.add(cur)
@@ -222,3 +288,7 @@ class TileMap(Sprite):
         path.reverse()
         
         return path
+        
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

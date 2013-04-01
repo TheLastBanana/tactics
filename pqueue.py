@@ -60,6 +60,8 @@ class PQueue:
     False
     >>> len(q)
     2
+    >>> q.peek_smallest()
+    ('thing', 5)
     >>> q.pop_smallest()
     ('thing', 5)
     >>> q.pop_smallest()
@@ -68,11 +70,29 @@ class PQueue:
     False
     >>> q.is_empty()
     True
+    >>> q.tie_breaker = lambda x,y: x[1] < y[1]
+    >>> q.update(("A", 6), 5)
+    True
+    >>> q.update(("B", 1), 5)
+    True
+    >>> q.update(("C", 10), 1)
+    True
+    >>> q.update(("D", 4), 5)
+    True
+    >>> q.pop_smallest()[0][0]
+    'C'
+    >>> q.pop_smallest()[0][0]
+    'B'
+    >>> q.pop_smallest()[0][0]
+    'D'
+    >>> q.pop_smallest()[0][0]
+    'A'
     
     """
     def __init__(self):
         self._heap = []
         self._keyindex = {}
+        self.tie_breaker = None
         
     def __len__(self):
         return len(self._heap)
@@ -109,8 +129,20 @@ class PQueue:
         # This is a leaf, so stop
         if not children: return
         
+        # Get the minimum child
         min_child = min(children, key=self._priority)
-        if self._priority(i) > self._priority(min_child):
+        
+        # If there are two children with the same priority, we need to break the tie
+        if self.tie_breaker and len(children) == 2:
+            c0 = children[0]
+            c1 = children[1]
+            if self._priority(c0) == self._priority(c1):
+                min_child = c0 if self.tie_breaker(self._key(c0), self._key(c1)) else c1
+        
+        # Sort, if necessary
+        a = self._priority(i)
+        b = self._priority(min_child)
+        if a > b or (self.tie_breaker and a == b and not self.tie_breaker(self._key(i), self._key(min_child))):
             # Swap with the minimum child and continue heapifying
             self._swap(i, min_child)
             self._heapify_down(min_child)
@@ -123,9 +155,17 @@ class PQueue:
         if i == 0: return
         
         parent = _parent(i)
-        if self._priority(i) < self._priority(parent):
+        a = self._priority(i)
+        b = self._priority(parent)
+        if a < b or (self.tie_breaker and a == b and self.tie_breaker(self._key(i), self._key(parent))):
             self._swap(i, parent)
             self._heapify_up(parent)
+            
+    def peek_smallest(self):
+        """
+        Returns a tuple containing the key with the smallest priority and its associated priority.
+        """
+        return self._heap[0]
         
     def pop_smallest(self):
         """
