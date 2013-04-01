@@ -134,7 +134,7 @@ class TileMap(Sprite):
         """
         Returns a tile's coordinates in tile units within the map given its index in the list.
         """
-        return (index % self._map_width, index // self._map_height)
+        return (index % self._map_width, index // self._map_width)
         
     def _tile_exists(self, coords):
         """
@@ -233,7 +233,7 @@ class TileMap(Sprite):
         tile_file = open(filename, 'r')
         
         lines = tile_file.readlines()
-        if len(lines) < self._map_height:
+        if len(lines) != self._map_height:
                 raise Exception("Expected {} rows of tiles, but got {}".format(self._map_height, len(lines)))
         
         # this will store the new set of tiles temporarily so that we can revert in case the read operation fails
@@ -244,7 +244,7 @@ class TileMap(Sprite):
             line = line.split(' ')
             
             # there should be map_width tiles per line
-            if len(line) < self._map_width:
+            if len(line) != self._map_width:
                 raise Exception("Expected {} tiles per line, but got {}".format(self._map_width, len(line)))
             
             # add all the tiles
