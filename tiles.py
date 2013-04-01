@@ -5,13 +5,13 @@ from pygame.sprite import Sprite
 from collections import namedtuple
 
 # A container class which stores information about a tile.
-Tile = namedtuple('Tile', ['sprite_id', 'passable'])
+Tile = namedtuple('Tile', ['type', 'sprite_id', 'passable'])
 
 # a dictionary of tile IDs associated with their type data
 tile_types = {
-    0:  Tile(0, True),       # default
-    1:  Tile(1, False),      # wall
-    2:  Tile(2, False)       # water
+    0:  Tile('plains', 0, True),
+    1:  Tile('wall', 1, False),
+    2:  Tile('water', 2, False)
 }
 
 def manhattan_dist(a, b):
@@ -48,6 +48,23 @@ def squared_segment_dist(p, a, b):
     Returns the distance between a point p and a line segment between
     the points a and b.
     Code adapted from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+    
+    Examples:
+    >>> squared_segment_dist((0, 2), (0, 0), (5, 5)) == 2
+    True
+    
+    A point on the line has distance 0:
+    >>> squared_segment_dist((3, 3), (0, 0), (5, 5)) == 0
+    True
+    
+    If the point is beyond the beginning of the line, you will just
+    get the squared distance from p to a:
+    >>> squared_segment_dist((0, 1), (3, 2), (5, 9)) == squared_dist((0, 1), (3, 2))
+    True
+    
+    The same applies for the end point:
+    >>> squared_segment_dist((10, 15), (3, 2), (5, 9)) == squared_dist((10, 15), (5, 9))
+    True
     """
     len2 = squared_dist(a, b)
     # If the segment is actually a point, our job is a lot easier!
@@ -64,7 +81,7 @@ def squared_segment_dist(p, a, b):
     )
     return squared_dist(p, close_point)
     
-def compare_tile(a, b, start, end):
+def better_tile(a, b, start, end):
     """
     Picks the best tile to use. This is used in case of a tie in the
     priority queue. Returns True if choosing tile a, or False for tile b.
@@ -72,6 +89,23 @@ def compare_tile(a, b, start, end):
     will be given priority. If there's still a tie, the tile with the
     lowest Y is chosen. Finally, if that fails, the tile with the lowest
     X is chosen.
+    
+    Examples:
+    The best tile here is (1, 1), as it lies directly on the line:
+    >>> better_tile((1, 1), (1, 2), (0, 0), (3, 3))
+    True
+    
+    The best tile here is (1, 4), as it lies closer to the line:
+    >>> better_tile((1, 1), (1, 4), (0, 3), (3, 3))
+    False
+    
+    Both tiles are equidistant to the line, so we choose the lowest Y, (1, 0):
+    >>> better_tile((0, 1), (1, 0), (0, 0), (3, 3))
+    False
+    
+    Both tiles are equidistant to the line and have equal Y, so we choose the lowest X, (3, 1):
+    >>> better_tile((3, 1), (5, 1), (4, 0), (4, 4))
+    True
     """
     dist_a = round(squared_segment_dist(a, start, end), 3)
     dist_b = round(squared_segment_dist(b, start, end), 3)
@@ -98,27 +132,49 @@ class TileMap(Sprite):
     """
     A class which renders a grid of tiles from a spritesheet.
     """
-    def __init__(self, target, sheet_name, tile_width, tile_height, map_width, map_height):
+    def __init__(self, sheet_name, tile_width, tile_height, map_width, map_height):
         """
-        target: the render target
         sheet_name: the filename of the sprite sheet to use
         tile_width: the width of each tile, in pixels
         tile_height: the height of each tile, in pixels
         map_width: the width of map, in tiles
         map_height: the height of the map, in tiles
+        
+        Example use:
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t.load_from_file("maps/emptysm.map")
+        
+        >>> t.tile_coords((45, 22))
+        (2, 1)
+        
+        >>> t.is_passable((3, 2))
+        True
+        >>> t.is_passable((8, 8))
+        False
+        
+        >>> t.find_path((0, 0), (4, 4))
+        [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
+        >>> t.find_path((0, 0), (5, 5))
+        []
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
+        >>> t.load_from_file("maps/testsm.map")
+        >>> t.find_path((2, 0), (4, 1))
+        [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), (3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
+        
         """
         self._sprite_sheet = pygame.image.load(sheet_name)
         self._tile_width = tile_width
         self._tile_height = tile_height
         self._map_width = map_width
         self._map_height = map_height
-        self._tiles = []
+        self.tiles = []
         self._highlights = {}
         self._grid_color = (0, 0, 0, 64)
         
         # Fill the list with empty tiles
         for i in range(self._tile_count()):
-            self._tiles.append(0)
+            self.tiles.append(0)
         
         Sprite.__init__(self)
         
@@ -171,7 +227,7 @@ class TileMap(Sprite):
         
         index = self._tile_index(coords)
         
-        return tile_types[self._tiles[index]].passable
+        return tile_types[self.tiles[index]].passable
         
     def set_highlight(self, colour, tiles):
         """
@@ -196,7 +252,7 @@ class TileMap(Sprite):
         
         # draw in each tile
         for i in range(self._tile_count()):
-            tile_id = tile_types[self._tiles[i]].sprite_id
+            tile_id = tile_types[self.tiles[i]].sprite_id
             
             # get its position from its index in the list
             x, y = self._tile_position(i)
@@ -256,7 +312,7 @@ class TileMap(Sprite):
         tile_file.close()
         
         # we loaded in the file properly, so copy it over to tiles
-        self._tiles = new_tiles[:]
+        self.tiles = new_tiles[:]
         
     def find_path(self, start, end, cost = lambda x: 1):
         """
@@ -279,7 +335,7 @@ class TileMap(Sprite):
         parents = {}
         
         while todo and (end not in visited):
-            todo.tie_breaker = lambda a,b: compare_tile(a, b, start, end)
+            todo.tie_breaker = lambda a,b: better_tile(a, b, start, end)
         
             cur, c = todo.pop_smallest()
             x, y = cur

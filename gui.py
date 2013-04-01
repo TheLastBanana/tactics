@@ -30,7 +30,7 @@ class GUI(LayeredUpdates):
         self.screen_rect = screen_rect
         self.bg_color = bg_color
 
-        self.map = tiles.TileMap(self.screen, "assets/tiles.png", 20, 20, 30, 30)
+        self.map = tiles.TileMap("assets/tiles.png", 20, 20, 30, 30)
         self.map.load_from_file("maps/basic.map")
         self.map.set_highlight((255, 0, 0, 150), self.map.find_path((0, 0), (29, 29)))
         self.add(self.map)
