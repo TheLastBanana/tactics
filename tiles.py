@@ -33,7 +33,7 @@ def squared_dist(a, b):
     
     >>> squared_dist((0, 0), (5, 5)) == 50
     True
-    >>> squared_dist((0, 5), (10, 7)) == 135
+    >>> squared_dist((0, 5), (10, 7)) == 104
     True
     >>> squared_dist((12, 9), (2, 3)) == 136
     True
@@ -45,6 +45,7 @@ def squared_segment_dist(p, a, b):
     """
     Returns the distance between a point p and a line segment between
     the points a and b.
+    Code adapted from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
     """
     len2 = squared_dist(a, b)
     # If the segment is actually a point, our job is a lot easier!
@@ -54,7 +55,7 @@ def squared_segment_dist(p, a, b):
     # onto the vector (a, b) (dot product)
     t = ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / len2
     if t < 0: return squared_dist(p, a) # Beyond point a
-    if t > 1: return squared_dist(p, a) # Beyond point b
+    if t > 1: return squared_dist(p, b) # Beyond point b
     close_point = (
         a[0] + t * (b[0] - a[0]),
         a[1] + t * (b[1] - a[1])
@@ -70,8 +71,8 @@ def compare_tile(a, b, start, end):
     lowest Y is chosen. Finally, if that fails, the tile with the lowest
     X is chosen.
     """
-    dist_a = squared_segment_dist(a, start, end)
-    dist_b = squared_segment_dist(b, start, end)
+    dist_a = round(squared_segment_dist(a, start, end), 3)
+    dist_b = round(squared_segment_dist(b, start, end), 3)
     
     # Choose the lowest slope difference
     if dist_a < dist_b:
@@ -110,12 +111,16 @@ class TileMap(Sprite):
         self._map_width = map_width
         self._map_height = map_height
         self._tiles = []
+        self._highlights = {}
         self._grid_color = (0, 0, 0, 64)
+        
+        # Fill the list with empty tiles
         for i in range(self._tile_count()):
             self._tiles.append(0)
         
         Sprite.__init__(self)
         
+        # These are required for a pygame Sprite
         self.image = pygame.Surface((self._tile_width * self._map_width, self._tile_height * self._map_height))
         self.rect = self.image.get_rect()
         
@@ -148,13 +153,27 @@ class TileMap(Sprite):
         
     def is_passable(self, coords):
         """
-        Returns true if a given tile is passable, and false otherwise.
+        Returns true if a given tile index is passable, and false otherwise.
         """
         if not self._tile_exists(coords): return False
         
         index = self._tile_index(coords)
         
         return tile_types[self._tiles[index]].passable
+        
+    def set_highlight(self, colour, tiles):
+        """
+        Sets the given list of tile coordinates to be highlighted in colour.
+        """
+        self._highlights[colour] = tiles
+        
+    def remove_highlight(self, colour):
+        """
+        Removes highlights of the given colour. If the highlights do not
+        exist, does nothing.
+        """
+        if colour in self._highlights:
+            del self._highlights[colour]
         
     def update(self):
         """
@@ -185,10 +204,16 @@ class TileMap(Sprite):
             pygame.gfxdraw.hline(self.image, 0, self._map_width * self._tile_width, y, self._grid_color)
         
             
-        # draw the debug path
-        for c in self.test_path:
-            tile_rect = pygame.Rect(c[0] * self._tile_width, c[1] * self._tile_height, self._tile_width, self._tile_height)
-            pygame.gfxdraw.box(self.image, tile_rect, (255, 0, 0, 150))
+        # draw the highlights
+        for colour, tiles in self._highlights.items():
+            for coord in tiles:
+                tile_rect = pygame.Rect(
+                    coord[0] * self._tile_width,
+                    coord[1] * self._tile_height,
+                    self._tile_width,
+                    self._tile_height
+                )
+                pygame.gfxdraw.box(self.image, tile_rect, colour)
             
     def load_from_file(self, filename):
         """
@@ -220,8 +245,6 @@ class TileMap(Sprite):
         
         # we loaded in the file properly, so copy it over to tiles
         self._tiles = new_tiles[:]
-            
-        self.test_path = self.find_path((0, 29), (0, 29))
         
     def find_path(self, start, end, cost = lambda x: 1):
         """
