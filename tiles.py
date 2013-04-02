@@ -131,7 +131,30 @@ def better_tile(a, b, start, end):
 class TileMap(Sprite):
     """
     A class which renders a grid of tiles from a spritesheet.
+        
+    Example use:
+    >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+    >>> t.load_from_file("maps/emptysm.map")
+    
+    >>> t.tile_coords((45, 22))
+    (2, 1)
+    
+    >>> t.is_passable((3, 2))
+    True
+    >>> t.is_passable((8, 8))
+    False
+    
+    >>> t.find_path((0, 0), (4, 4))
+    [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
+    >>> t.find_path((0, 0), (5, 5))
+    []
+    
+    >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
+    >>> t.load_from_file("maps/testsm.map")
+    >>> t.find_path((2, 0), (4, 1))
+    [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), (3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
     """
+    
     def __init__(self, sheet_name, tile_width, tile_height, map_width, map_height):
         """
         sheet_name: the filename of the sprite sheet to use
@@ -139,29 +162,6 @@ class TileMap(Sprite):
         tile_height: the height of each tile, in pixels
         map_width: the width of map, in tiles
         map_height: the height of the map, in tiles
-        
-        Example use:
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
-        >>> t.load_from_file("maps/emptysm.map")
-        
-        >>> t.tile_coords((45, 22))
-        (2, 1)
-        
-        >>> t.is_passable((3, 2))
-        True
-        >>> t.is_passable((8, 8))
-        False
-        
-        >>> t.find_path((0, 0), (4, 4))
-        [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
-        >>> t.find_path((0, 0), (5, 5))
-        []
-        
-        >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
-        >>> t.load_from_file("maps/testsm.map")
-        >>> t.find_path((2, 0), (4, 1))
-        [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), (3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
-        
         """
         self._sprite_sheet = pygame.image.load(sheet_name)
         self._tile_width = tile_width
