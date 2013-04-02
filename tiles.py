@@ -270,7 +270,6 @@ class TileMap(Sprite):
             pygame.gfxdraw.vline(self.image, x, 0, self._map_height * self._tile_height, self._grid_color)
         for y in range(0, self._map_height * self._tile_height, self._tile_height):
             pygame.gfxdraw.hline(self.image, 0, self._map_width * self._tile_width, y, self._grid_color)
-        
             
         # draw the highlights
         for colour, tiles in self._highlights.items():

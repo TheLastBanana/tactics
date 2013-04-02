@@ -29,14 +29,43 @@ class GUI(LayeredUpdates):
         self.screen = pygame.display.set_mode((screen_rect.w, screen_rect.h))
         self.screen_rect = screen_rect
         self.bg_color = bg_color
-
-        self.map = tiles.TileMap("assets/tiles.png", 20, 20, 30, 30)
-        self.map.load_from_file("maps/basic.map")
-        self.map.set_highlight((255, 0, 0, 150), self.map.find_path((0, 0), (29, 29)))
-        self.add(self.map)
+        self.map = None
 
         #Not line height, actually font size, but conveniently the same thing
         self.font = pygame.font.SysFont("Arial", FONT_SIZE)
+        
+    def load_level(self, filename):
+        """
+        Loads a map from the given filename.
+        """
+        self.remove(self.map)
+        
+        map_file = open(filename, 'r')
+        
+        # Get the map size
+        line = map_file.readline()
+        w, h = [int(x) for x in line.split('x')]
+        
+        # Move up to the start of the map
+        while line.find("MAP START") < 0:
+            line = map_file.readline()
+        line = map_file.readline()
+            
+        # Read in the map.
+        map_tiles = []
+        while line.find("MAP END") < 0:
+            line = line.rstrip()
+            line = line.split(' ')
+            for c in line:
+                map_tiles.append(int(c))
+            line = map_file.readline()
+        if len(map_tiles) != w * h:
+            raise Exception("Wrong number of tiles in {}!".format(filename))
+        
+        # Create the tile map.
+        self.map = tiles.TileMap("assets/tiles.png", 20, 20, w, h)
+        self.map.tiles = map_tiles
+        self.add(self.map)
 
     def draw(self):
         """
@@ -52,6 +81,8 @@ class GUI(LayeredUpdates):
         """
         Draws the info bar on the right side of the screen, polls the mouse location to find which tile is currently being hovered over.
         """
+        if not self.map: return
+        
         line_num = 0
         #draw the background of the bar
         barRect = pygame.Rect(MAP_WIDTH, 0, 200, 600)
