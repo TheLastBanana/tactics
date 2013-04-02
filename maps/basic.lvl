@@ -33,6 +33,7 @@ MAP START
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 MAP END
 
-Units:
+UNITS START
 Tank 0 0
 Tank 20 20
+UNITS END

@@ -1,5 +1,6 @@
 import sys, pygame, tiles
 from gui import GUI
+import unit.base_unit
 
 # Initialize everything
 pygame.init()

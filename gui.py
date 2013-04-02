@@ -1,6 +1,6 @@
 import sys, pygame
 from pygame.sprite import LayeredUpdates
-import tiles
+import tiles, unit
 
 MAP_WIDTH = 600
 BAR_WIDTH = 200
@@ -51,7 +51,7 @@ class GUI(LayeredUpdates):
             line = map_file.readline()
         line = map_file.readline()
             
-        # Read in the map.
+        # Read in the map
         map_tiles = []
         while line.find("MAP END") < 0:
             line = line.rstrip()
@@ -62,10 +62,32 @@ class GUI(LayeredUpdates):
         if len(map_tiles) != w * h:
             raise Exception("Wrong number of tiles in {}!".format(filename))
         
-        # Create the tile map.
+        # Create the tile map
         self.map = tiles.TileMap("assets/tiles.png", 20, 20, w, h)
         self.map.tiles = map_tiles
         self.add(self.map)
+        
+        # Move up to the unit definitions
+        while line.find("UNITS START") < 0:
+            line = map_file.readline()
+        line = map_file.readline()
+        
+        # Create the units
+        while line.find("UNITS END") < 0:
+            line = line.rstrip()
+            line = line.split(' ')
+            unit_name = line[0]
+            x, y = int(line[1]), int(line[2])
+            x, y = self.map.screen_coords((x, y))
+            
+            if not unit_name in unit.unit_types:
+                raise Exception("No unit of name {} found!".format(unit_name))
+            new_unit = unit.unit_types[unit_name]()
+            new_unit.rect.x = x
+            new_unit.rect.y = y
+            self.add(new_unit)
+            
+            line = map_file.readline()
 
     def draw(self):
         """

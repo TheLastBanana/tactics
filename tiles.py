@@ -138,6 +138,8 @@ class TileMap(Sprite):
     
     >>> t.tile_coords((45, 22))
     (2, 1)
+    >>> t.screen_coords((3, 4))
+    (60, 80)
     
     >>> t.is_passable((3, 2))
     True
@@ -217,6 +219,16 @@ class TileMap(Sprite):
         return (
             math.floor((x - self.rect.left) / self._tile_width),
             math.floor((y - self.rect.top) / self._tile_height)
+        )
+        
+    def screen_coords(self, tile_coords):
+        """
+        Returns the screen coordinates of a given tile.
+        """
+        x, y = tile_coords
+        return (
+            x * self._tile_width,
+            y * self._tile_height
         )
         
     def is_passable(self, coords):
