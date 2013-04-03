@@ -12,12 +12,15 @@ class BaseUnit(Sprite):
         self.health = 10
         self.speed = 8
         self._angle = 0
-        self._base_image = pygame.image.load("assets/tank.png")
+        self._moving = False
     
         Sprite.__init__(self)
         
         self.image = self._base_image
         self.rect = self.image.get_rect()
+
+    def is_moving(self):
+        return self._moving
         
     def set_angle(self, angle):
         """
@@ -28,4 +31,30 @@ class BaseUnit(Sprite):
         self._angle = angle
         self.image = pygame.transform.rotate(self._base_image, self._angle)
 
-unit.unit_types["Tank"] = BaseUnit
+    def get_speed_str(self):
+        """
+        Returns the unit's speed as a string.
+        """
+        return str(self.speed)
+
+    def get_health_str(self):
+        """
+        Returns the unit's health as a string.
+        """
+        return str(self.health)
+
+    def get_direction(self):
+        """
+        Returns the unit's angle as a cardinal direcion
+            (i.e. North, South, East, West).
+        """
+        angle = abs(self._angle % 90)
+
+        if angle == 0:
+            return "East"
+        elif angle == 90:
+            return "North"
+        elif angle == 180:
+            return "West"
+        elif angle == 270:
+            return "South"

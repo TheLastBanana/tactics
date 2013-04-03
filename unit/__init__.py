@@ -1,2 +1,2 @@
-__all__ = ["base_unit"]
+__all__ = ["base_unit", "tank"]
 unit_types = {}
