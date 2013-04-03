@@ -109,7 +109,7 @@ class GUI(LayeredUpdates):
                 self.sel_unit = None
 
             #update the selected unit
-            elif unit != self.sel_unit:
+            elif unit and unit != self.sel_unit:
                 self.sel_unit = unit
                 
     def unit_at_pos(self, pos):
