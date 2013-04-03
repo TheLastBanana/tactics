@@ -15,7 +15,8 @@ while 1:
             pygame.display.quit()
             sys.exit()
         # End if q is pressed
-        elif event.type == pygame.KEYDOWN and event.unicode == 'q':
+        elif (event.type == pygame.KEYDOWN and
+        (event.key == pygame.K_q or event.key == pygame.K_ESCAPE)):
             pygame.display.quit()
             sys.exit()
         # Respond to clicks
