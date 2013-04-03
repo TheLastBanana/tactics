@@ -27,13 +27,27 @@ class EventManager:
         
         return None
 
-    def key_down(self, key):
+    def is_key_down(self, key):
         """
         Shortcut function to check if a given key was pressed.
         Returns the function if it occurred, or None otherwise.
         """
         # Look for a key down event
         event = self.check_event(pygame.KEYDOWN)
+            
+        # Check if it is the correct key
+        if event and event.key == key:
+            return event
+            
+        return None
+
+    def is_key_up(self, key):
+        """
+        Shortcut function to check if a given key was released.
+        Returns the function if it occurred, or None otherwise.
+        """
+        # Look for a key down event
+        event = self.check_event(pygame.KEYUP)
             
         # Check if it is the correct key
         if event and event.key == key:

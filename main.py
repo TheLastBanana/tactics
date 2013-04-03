@@ -23,8 +23,8 @@ while 1:
     
     # Quit when the window is closed or Q/ESC is pressed.
     if (event_man.check_event(pygame.QUIT)
-    or event_man.key_down(pygame.K_ESCAPE)
-    or event_man.key_down(pygame.K_q)):
+    or event_man.is_key_down(pygame.K_ESCAPE)
+    or event_man.is_key_down(pygame.K_q)):
         pygame.display.quit()
         sys.exit()
 
