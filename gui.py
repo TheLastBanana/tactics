@@ -192,8 +192,8 @@ class GUI(LayeredUpdates):
             self.draw_bar_div_line(line_num)
             line_num += 1
 
-        self.draw_bar_button(1, "MOVE", None)
-        self.draw_bar_button(2, "ATTACK", None)
+        self.draw_bar_button(1, "MOVE")
+        self.draw_bar_button(2, "ATTACK")
 
     def draw_bar_text(self, text, line_num):
         """
@@ -216,14 +216,11 @@ class GUI(LayeredUpdates):
         y = FONT_SIZE * line_num + FONT_SIZE//2 + PAD
         pygame.draw.line(self.screen, (50, 50, 50), (MAP_WIDTH, y), (MAP_WIDTH + BAR_WIDTH, y))
 
-    def draw_bar_button(self, slot_num, text, reaction):
+    def draw_bar_button(self, slot_num, text):
         """
         Renders a button to the bar with specified text.
         Each "slot" is a BUTTON_HEIGHT pixel space counting up from the bottom of the screen.
         If the mouse is hovering over the button it is rendered in white, else rgb(50, 50, 50).
-
-        As of right now, reaction is used for nothing, but most likely will be the reaction function
-        when the button is clicked.
         """
         y = self.screen.get_height() - BUTTON_HEIGHT*slot_num
         but_rect = pygame.Rect(MAP_WIDTH, y, 200, 50)
