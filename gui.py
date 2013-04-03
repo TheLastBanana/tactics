@@ -1,6 +1,8 @@
 import sys, pygame
 from pygame.sprite import LayeredUpdates
-import tiles, unit
+import tiles
+from unit import *
+import unit
 
 MAP_WIDTH = 600
 BAR_WIDTH = 200
@@ -30,6 +32,10 @@ class GUI(LayeredUpdates):
         self.screen_rect = screen_rect
         self.bg_color = bg_color
         self.map = None
+
+        self.unit_group = pygame.sprite.Group()
+        self.add(self.unit_group)
+        self.sel_unit = None
 
         #Not line height, actually font size, but conveniently the same thing
         self.font = pygame.font.SysFont("Arial", FONT_SIZE)
@@ -85,9 +91,40 @@ class GUI(LayeredUpdates):
             new_unit = unit.unit_types[unit_name]()
             new_unit.rect.x = x
             new_unit.rect.y = y
-            self.add(new_unit)
+            self.unit_group.add(new_unit)
             
             line = map_file.readline()
+
+    def on_click(self, e):
+        #make sure we have focus
+        if e.type == pygame.MOUSEBUTTONUP and pygame.mouse.get_focused():
+            #get the unit at the mouseclick
+            unit = self.unit_at_pos(e.pos)
+
+            #TODO, this will need to be updated once we have a concept of ownership
+            # as well as attack/move states
+
+            #clicking the same unit again deselects it
+            if unit == self.sel_unit:
+                self.sel_unit = None
+
+            #update the selected unit
+            elif unit != self.sel_unit:
+                self.sel_unit = unit
+                
+    def unit_at_pos(self, pos):
+        """
+        Gets the unit at a specified position. ((x,y) tuple).
+        Returns None if no unit.
+        """
+        #iterate over all unit sprites
+        for unit in self.unit_group.sprites():
+            #determine if the click was inside the unit
+            if unit.rect.collidepoint(pos):
+                return unit
+
+        #return no unit
+        return None
 
     def draw(self):
         """
@@ -96,6 +133,7 @@ class GUI(LayeredUpdates):
         self.screen.fill(self.bg_color)
         LayeredUpdates.update(self)
         LayeredUpdates.draw(self, self.screen)
+        self.unit_group.draw(self.screen)
         self.drawBar()
         pygame.display.flip()
 
@@ -130,17 +168,29 @@ class GUI(LayeredUpdates):
         self.draw_bar_div_line(line_num)
         line_num += 1
 
-        #title for tile section
-        self.draw_bar_title("UNIT INFO", line_num)
-        line_num += 1
+        if self.sel_unit:
+            #title for tile section
+            self.draw_bar_title("UNIT INFO", line_num)
+            line_num += 1
 
-        #test
-        self.draw_bar_text("Test: {}".format(True), line_num)
-        line_num += 1
+            #health
+            health = self.sel_unit.get_health_str()
+            self.draw_bar_text("Health: {}".format(health), line_num)
+            line_num += 1
 
-        #divider
-        self.draw_bar_div_line(line_num)
-        line_num += 1
+            #speed
+            speed = self.sel_unit.get_speed_str()
+            self.draw_bar_text("Speed: {}".format(speed), line_num)
+            line_num += 1
+
+            #Facing
+            direction = self.sel_unit.get_direction()
+            self.draw_bar_text("Facing: {}".format(direction), line_num)
+            line_num += 1
+
+            #divider
+            self.draw_bar_div_line(line_num)
+            line_num += 1
 
         self.draw_bar_button(1, "MOVE", None)
         self.draw_bar_button(2, "ATTACK", None)
