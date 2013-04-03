@@ -140,7 +140,8 @@ class GUI(LayeredUpdates):
         LayeredUpdates.update(self)
         LayeredUpdates.draw(self, self.screen)
         
-        # Draw units
+        # update and draw units
+        self.unit_group.update()
         self.unit_group.draw(self.screen)
         
         # If there's a selected unit, highlight it
