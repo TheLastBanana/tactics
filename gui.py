@@ -13,8 +13,9 @@ CENTER = 100
 # padding for left and top side of the bar
 PAD = 6
 
-# RGBA color for the border around the selected unit
+# RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
+MOVE_COLOR = (0, 0, 255, 100)
 
 # RGB colors for the GUI
 FONT_COLOR = (0, 0, 0)
@@ -35,7 +36,17 @@ class GUI(LayeredUpdates):
         """
         This is called when the move button is pressed.
         """
-        print("ZOOM")
+        # If there no unit selected, nothing happens.
+        if not self.sel_unit: return
+        
+        # Determine where we can move.
+        pos = self.map.tile_coords(
+            (self.sel_unit.rect.x, self.sel_unit.rect.y))
+        movable = self.map.reachable_tiles(pos, self.sel_unit.speed)
+        
+        # Highlight those squares
+        self.map.clear_highlights()
+        self.map.set_highlight(MOVE_COLOR, movable)
             
     def attack_pressed(self):
         """
@@ -150,10 +161,12 @@ class GUI(LayeredUpdates):
                 # clicking the same unit again deselects it
                 if unit == self.sel_unit:
                     self.sel_unit = None
+                    self.map.clear_highlights()
 
                 # update the selected unit
                 elif unit and unit != self.sel_unit:
                     self.sel_unit = unit
+                    self.map.clear_highlights()
             
             # Otherwise, the user is interacting with the GUI panel
             else:

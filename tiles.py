@@ -271,7 +271,7 @@ class TileMap(Sprite):
         if colour in self._highlights:
             del self._highlights[colour]
             
-    def clear_highlight(self):
+    def clear_highlights(self):
         """
         Removes all highlights.
         """
