@@ -114,7 +114,7 @@ def better_tile(a, b, start, end):
     dist_a = round(squared_segment_dist(a, start, end), 3)
     dist_b = round(squared_segment_dist(b, start, end), 3)
     
-    # Choose the lowest slope difference
+    # Choose the lowest difference from the line
     if dist_a < dist_b:
         return True
     elif dist_a > dist_b:
@@ -270,6 +270,12 @@ class TileMap(Sprite):
         """
         if colour in self._highlights:
             del self._highlights[colour]
+            
+    def clear_highlight(self):
+        """
+        Removes all highlights.
+        """
+        self._highlights.clear()
         
     def update(self):
         """
