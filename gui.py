@@ -1,21 +1,47 @@
 import sys, pygame
 from pygame.sprite import LayeredUpdates
-import tiles
+from collections import namedtuple
+import tiles, unit
 from unit import *
-import unit
 
 MAP_WIDTH = 600
 BAR_WIDTH = 200
 FONT_SIZE = 16
 BUTTON_HEIGHT = 50
 CENTER = 100
-#padding for left and top side of the bar
+
+# padding for left and top side of the bar
 PAD = 6
+
+# RGBA color for the border around the selected unit
 SELECT_COLOR = (255, 255, 0, 255)
+
+# RGB colors for the GUI
+FONT_COLOR = (0, 0, 0)
+BAR_COLOR = (150, 150, 150)
+OUTLINE_COLOR = (50, 50, 50)
+HIGHLIGHT_COLOR = (255, 255, 255)
+
+# A container class which stores button information.
+# Each "slot" is a BUTTON_HEIGHT pixel space counting up from the bottom
+# of the screen.
+Button = namedtuple('Button', ['slot', 'text', 'onClick'])
 
 class GUI(LayeredUpdates):
     # number of GUI instances
     num_instances = 0
+            
+    def move_pressed(self):
+        """
+        This is called when the move button is pressed.
+        """
+        print("ZOOM")
+            
+    def attack_pressed(self):
+        """
+        This is called when the attack button is pressed.
+        """
+        print("BOOM")
 
     def __init__(self, screen_rect, bg_color):
         """
@@ -29,16 +55,23 @@ class GUI(LayeredUpdates):
             raise Exception("GUI: can only have one instance of a simulation")
         GUI.num_instances = 1
         
+        # Set up the screen
         self.screen = pygame.display.set_mode((screen_rect.w, screen_rect.h))
         self.screen_rect = screen_rect
         self.bg_color = bg_color
         self.map = None
 
+        # Set up unit information
         self.unit_group = pygame.sprite.Group()
         self.add(self.unit_group)
         self.sel_unit = None
+        
+        # Set up GUI
+        self.buttons = [
+            Button(0, "MOVE", self.move_pressed),
+            Button(1, "ATTACK", self.attack_pressed)]
 
-        #Not line height, actually font size, but conveniently the same thing
+        # Not line height, actually font size, but conveniently the same thing
         self.font = pygame.font.SysFont("Arial", FONT_SIZE)
         
     def load_level(self, filename):
@@ -95,25 +128,39 @@ class GUI(LayeredUpdates):
             self.unit_group.add(new_unit)
             
             line = map_file.readline()
-
+        
     def on_click(self, e):
-        #make sure we have focus
+        """
+        This is called when a click event occurs.
+        e is the click event.
+        """
+        # make sure we have focus and that it was the left mouse button
         if (e.type == pygame.MOUSEBUTTONUP
             and e.button == 1
             and pygame.mouse.get_focused()):
-            #get the unit at the mouseclick
-            unit = self.unit_at_pos(e.pos)
+            
+            # If this is in the map, we're dealing with units
+            if self.map.rect.collidepoint(e.pos):
+                # get the unit at the mouseclick
+                unit = self.unit_at_pos(e.pos)
 
-            #TODO, this will need to be updated once we have a concept of ownership
-            # as well as attack/move states
+                #TODO, this will need to be updated once we have a concept of ownership
+                # as well as attack/move states
 
-            #clicking the same unit again deselects it
-            if unit == self.sel_unit:
-                self.sel_unit = None
+                # clicking the same unit again deselects it
+                if unit == self.sel_unit:
+                    self.sel_unit = None
 
-            #update the selected unit
-            elif unit and unit != self.sel_unit:
-                self.sel_unit = unit
+                # update the selected unit
+                elif unit and unit != self.sel_unit:
+                    self.sel_unit = unit
+            
+            # Otherwise, the user is interacting with the GUI panel
+            else:
+                # Check which button was pressed
+                for button in self.buttons:
+                    if self.get_button_rect(button).collidepoint(e.pos):
+                        button.onClick()
                 
     def unit_at_pos(self, pos):
         """
@@ -152,12 +199,12 @@ class GUI(LayeredUpdates):
                 SELECT_COLOR)
         
         # Draw the status bar
-        self.drawBar()
+        self.draw_bar()
 
         # Update the screen
         pygame.display.flip()
 
-    def drawBar(self):
+    def draw_bar(self):
         """
         Draws the info bar on the right side of the screen, polls the mouse
         location to find which tile is currently being hovered over.
@@ -166,10 +213,12 @@ class GUI(LayeredUpdates):
         
         line_num = 0
         #draw the background of the bar
-        barRect = pygame.Rect(MAP_WIDTH, 0, 200, 600)
-        outlineRect = pygame.Rect(MAP_WIDTH, 0, 199, 599)
-        pygame.draw.rect(self.screen, (150, 150, 150), barRect)
-        pygame.draw.rect(self.screen, (50, 50, 50), outlineRect, 2)
+        barRect = pygame.Rect(MAP_WIDTH, 0, BAR_WIDTH,
+            self.screen.get_height())
+        outlineRect = pygame.Rect(MAP_WIDTH, 0, BAR_WIDTH - 1,
+            self.screen.get_height() - 1)
+        pygame.draw.rect(self.screen, BAR_COLOR, barRect)
+        pygame.draw.rect(self.screen, OUTLINE_COLOR, outlineRect, 2)
 
         #title for tile section
         self.draw_bar_title("TILE INFO", line_num)
@@ -215,14 +264,14 @@ class GUI(LayeredUpdates):
             self.draw_bar_div_line(line_num)
             line_num += 1
 
-        self.draw_bar_button(1, "MOVE")
-        self.draw_bar_button(2, "ATTACK")
+        for button in self.buttons:
+            self.draw_bar_button(button)
 
     def draw_bar_text(self, text, line_num):
         """
         Draws text with a specified variable at a specifed line number.
         """
-        line_text = self.font.render(text, True, (0,0,0))
+        line_text = self.font.render(text, True, FONT_COLOR)
         self.screen.blit(
             line_text,
             (MAP_WIDTH + PAD, FONT_SIZE * line_num + PAD))
@@ -231,7 +280,7 @@ class GUI(LayeredUpdates):
         """
         Draws a title at a specified line number with the specified text.
         """
-        title_text = self.font.render(text, True, (0,0,0))
+        title_text = self.font.render(text, True, FONT_COLOR)
         self.screen.blit(
             title_text,
             (MAP_WIDTH + CENTER - (title_text.get_width()/2),
@@ -247,28 +296,41 @@ class GUI(LayeredUpdates):
             (50, 50, 50),
             (MAP_WIDTH, y),
             (MAP_WIDTH + BAR_WIDTH, y))
-
-    def draw_bar_button(self, slot_num, text):
+            
+    def get_button_rect(self, button):
         """
-        Renders a button to the bar with specified text.
-        Each "slot" is a BUTTON_HEIGHT pixel space counting up from the bottom
-        of the screen.
+        Gets the rectangle bounding a button in screen cordinates.
+        """
+        # The y-coordinate is based on its slot number
+        y = self.screen.get_height() - BUTTON_HEIGHT * (button.slot + 1)
+        return pygame.Rect(MAP_WIDTH, y, BAR_WIDTH, BUTTON_HEIGHT)
+
+    def draw_bar_button(self, button):
+        """
+        Renders a button to the bar.
         If the mouse is hovering over the button it is rendered in white, else
         rgb(50, 50, 50).
         """
-        y = self.screen.get_height() - BUTTON_HEIGHT*slot_num
-        but_rect = pygame.Rect(MAP_WIDTH, y, 200, 50)
-        but_out_rect = pygame.Rect(MAP_WIDTH, y, 199, 50)
 
+        but_rect = self.get_button_rect(button)
+        
+        # The outline needs a slightly smaller rectangle
+        but_out_rect = but_rect
+        but_out_rect.width -= 1
+
+        # Highlight on mouse over
         mouse_pos = pygame.mouse.get_pos()
         if but_rect.collidepoint(mouse_pos):
-            pygame.draw.rect(self.screen, (255, 255, 255), but_rect)
+            pygame.draw.rect(self.screen, HIGHLIGHT_COLOR, but_rect)
         else:
-            pygame.draw.rect(self.screen, (150, 150, 150), but_rect)
-        pygame.draw.rect(self.screen, (50, 50, 50), but_out_rect, 2)
+            pygame.draw.rect(self.screen, BAR_COLOR, but_rect)
+            
+        # Draw the outline
+        pygame.draw.rect(self.screen, OUTLINE_COLOR, but_out_rect, 2)
 
-        but_text = self.font.render(text, True, (0,0,0))
+        # Draw the text
+        but_text = self.font.render(button.text, True, FONT_COLOR)
         self.screen.blit(
             but_text,
             (MAP_WIDTH + CENTER - (but_text.get_width()/2),
-            y + (BUTTON_HEIGHT//2) - but_text.get_height()//2))
+            but_rect.y + (BUTTON_HEIGHT//2) - but_text.get_height()//2))
