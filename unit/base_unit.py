@@ -55,7 +55,7 @@ class BaseUnit(Sprite):
                 #notify not moving
                 self._moving = False
                 return
-
+                
             #There's a path to move on
             else:
                 #If we're at the next tile remove it
@@ -90,7 +90,6 @@ class BaseUnit(Sprite):
                 #set the new value
                 new_val = (rect_x + dx, rect_y + dy)
                 self.tile_rect.topleft = new_val
-                
 
     def set_path(self, path):
         """
