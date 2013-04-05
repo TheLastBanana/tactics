@@ -172,14 +172,17 @@ class GUI(LayeredUpdates):
             line = line.rstrip()
             line = line.split(' ')
             unit_name = line[0]
-            x, y = int(line[1]), int(line[2])
+            unit_team = int(line[1])
+            unit_x, unit_y = int(line[2]), int(line[3])
+            unit_angle = int(line[4])
             
             if not unit_name in unit.unit_types:
                 raise Exception("No unit of name {} found!".format(unit_name))
-            new_unit = unit.unit_types[unit_name]()
-            new_unit.tile_x = x
-            new_unit.tile_y = y
-            new_unit.activate()
+            new_unit = unit.unit_types[unit_name](team = unit_team,
+                                                  tile_x = unit_x,
+                                                  tile_y = unit_y,
+                                                  activate = True,
+                                                  angle = unit_angle)
             
             # Add the unit to the update group and set its display rect
             self.update_unit_rect(new_unit)
