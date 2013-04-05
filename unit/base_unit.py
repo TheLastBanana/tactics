@@ -14,14 +14,17 @@ class BaseUnit(Sprite):
     active_units = set()
     
     def __init__(self,
+                 team = -1,
                  tile_x = None,
                  tile_y = None,
+                 angle = 0,
+                 activate = False,
                  **keywords):
         
-        
-        self.health = 10
-        self.speed = 8
-        self._angle = 0
+        #Some default values so that nothing complains when trying to
+        #assign later.
+        self.team = team
+        self._angle = angle
         self._moving = False
         self._active = False
     
@@ -29,10 +32,13 @@ class BaseUnit(Sprite):
         
         self._path = []
 
-        self.image = self._base_image
+        self.image = pygame.transform.rotate(self._base_image, self._angle)
         self.rect = self.image.get_rect()
         self.tile_x = tile_x
         self.tile_y = tile_y
+        
+        if activate:
+            self.activate()
         
     def activate(self):
         """
