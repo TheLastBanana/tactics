@@ -15,7 +15,7 @@ PAD = 6
 
 # RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
-MOVE_COLOR = (0, 0, 255, 255)
+MOVE_COLOR = (0, 0, 255, 150)
 
 # RGB colors for the GUI
 FONT_COLOR = (0, 0, 0)
@@ -44,14 +44,14 @@ class GUI(LayeredUpdates):
         """
         # If there no unit selected, nothing happens.
         if not self.sel_unit: return
-        
         # Determine where we can move.
         pos = self.map.tile_coords(
             (self.sel_unit.rect.x, self.sel_unit.rect.y))
-        movable = self.map.reachable_tiles(pos,
-                                           self.sel_unit.speed,
-                                           self.sel_unit.move_cost,
-                                           self.sel_unit.is_passable)
+        self._movable_tiles = self.map.reachable_tiles(
+            pos,
+            self.sel_unit.speed,
+            self.sel_unit.move_cost,
+            self.sel_unit.is_passable)
         
         # Highlight those squares
         self.map.clear_highlights()
@@ -165,8 +165,8 @@ class GUI(LayeredUpdates):
             if not unit_name in unit.unit_types:
                 raise Exception("No unit of name {} found!".format(unit_name))
             new_unit = unit.unit_types[unit_name]()
-            new_unit.tile_rect.x = x
-            new_unit.tile_rect.y = y
+            new_unit.tile_x = x
+            new_unit.tile_y = y
             new_unit.activate()
             
             # Add the unit to the update group and set its display rect
@@ -174,17 +174,6 @@ class GUI(LayeredUpdates):
             self.unit_group.add(new_unit)
             
             line = map_file.readline()
-
-    def _move_unit(self, unit, new_pos):
-        """
-        Moves a unit within the directory.
-        NOTE: This does not change the unit's screen position!
-        """
-        old_pos = self.map.tile_coords((unit.rect.x, unit.rect.y))
-        
-        # Remove it from the old position
-        self._unit_directory[old_pos] = None
-        self._unit_directory[new_pos] = unit
         
     def on_click(self, e):
         """
@@ -215,16 +204,22 @@ class GUI(LayeredUpdates):
                         self.sel_unit = unit
                 else:
                     # No unit there, so a tile was clicked
-                    tile_pos = self.map.tile_coords(e.pos)
+                    to_tile_pos = self.map.tile_coords(e.pos)
                     
                     # Move to the selected tile
                     if (self.mode == Modes.ChooseMove and self.sel_unit
-                        and tile_pos in self._movable_tiles):
+                        and to_tile_pos in self._movable_tiles):
                         self.mode = Modes.Moving
+                        
+                        #the tile position the unit is at
+                        from_tile_pos = (self.sel_unit.tile_x,
+                                         self.sel_unit.tile_y)
+                        
+                        #set the path in the unit.
                         self.sel_unit.set_path(
                             self.map.find_path(
-                                self.sel_unit.tile_rect.topleft,
-                                tile_pos))
+                                from_tile_pos,
+                                to_tile_pos))
             
             # Otherwise, the user is interacting with the GUI panel
             else:
@@ -239,7 +234,12 @@ class GUI(LayeredUpdates):
         Returns None if no unit.
         """
         for u in base_unit.BaseUnit.active_units:
-            if u.tile_rect.topleft == pos:
+            
+            #the postion of the unit in tile coords
+            unit_pos = (u.tile_x, u.tile_y)
+            
+            #compare to the desired coord
+            if unit_pos == pos:
                 return u
                 
         return None
@@ -257,7 +257,7 @@ class GUI(LayeredUpdates):
         """
         Scales a unit's display rectangle to screen coordiantes.
         """
-        x, y = unit.tile_rect.x, unit.tile_rect.y
+        x, y = unit.tile_x, unit.tile_y
         screen_x, screen_y = self.map.screen_coords((x, y))
         unit.rect.x = screen_x
         unit.rect.y = screen_y
