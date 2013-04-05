@@ -22,5 +22,6 @@ while 1:
         # Respond to clicks
         elif event.type == pygame.MOUSEBUTTONUP:
             main_gui.on_click(event)
+    main_gui.update()
     main_gui.draw()
     clock.tick(60)

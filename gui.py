@@ -79,10 +79,6 @@ class GUI(LayeredUpdates):
         self.unit_group = pygame.sprite.Group()
         self.sel_unit = None
         
-        # This directory keeps track of the unit in each tile
-        # key = tile position, value = unit
-        self._unit_directory = {}
-        
         # Set up GUI
         self.buttons = [
             Button(0, "MOVE", self.move_pressed),
@@ -129,27 +125,23 @@ class GUI(LayeredUpdates):
             line = map_file.readline()
         line = map_file.readline()
         
-        # Make an empty unit directory.
-        self._unit_directory.clear()
-        for x in range(w):
-            for y in range(h):
-                self._unit_directory[(x, y)] = None
-        
         # Create the units
         while line.find("UNITS END") < 0:
             line = line.rstrip()
             line = line.split(' ')
             unit_name = line[0]
             x, y = int(line[1]), int(line[2])
-            screen_x, screen_y = self.map.screen_coords((x, y))
             
             if not unit_name in unit.unit_types:
                 raise Exception("No unit of name {} found!".format(unit_name))
             new_unit = unit.unit_types[unit_name]()
-            new_unit.rect.x = screen_x
-            new_unit.rect.y = screen_y
+            new_unit.tile_rect.x = x
+            new_unit.tile_rect.y = y
+            new_unit.activate()
+            
+            # Add the unit to the update group and set its display rect
+            self.update_unit_rect(new_unit)
             self.unit_group.add(new_unit)
-            self._move_unit(new_unit, (x, y))
             
             line = map_file.readline()
 
@@ -204,7 +196,11 @@ class GUI(LayeredUpdates):
         Gets the unit at a specified tile position ((x,y) tuple).
         Returns None if no unit.
         """
-        return self._unit_directory[pos]
+        for u in base_unit.BaseUnit.active_units:
+            if u.tile_rect.topleft == pos:
+                return u
+                
+        return None
                 
     def unit_at_screen_pos(self, pos):
         """
@@ -214,6 +210,22 @@ class GUI(LayeredUpdates):
         # Get the unit's tile position.
         tile_pos = self.map.tile_coords(pos)
         return self.unit_at_pos(tile_pos)
+        
+    def update_unit_rect(self, unit):
+        """
+        Scales a unit's display rectangle to screen coordiantes.
+        """
+        x, y = unit.tile_rect.x, unit.tile_rect.y
+        screen_x, screen_y = self.map.screen_coords((x, y))
+        unit.rect.x = screen_x
+        unit.rect.y = screen_y
+        
+    def update(self):
+        """
+        Update everything in the group.
+        """
+        LayeredUpdates.update(self)
+        self.unit_group.update()
 
     def draw(self):
         """
@@ -223,11 +235,11 @@ class GUI(LayeredUpdates):
         self.screen.fill(self.bg_color)
         
         # Update and draw the group contents
-        LayeredUpdates.update(self)
         LayeredUpdates.draw(self, self.screen)
         
-        # update and draw units
-        self.unit_group.update()
+        # draw units
+        for unit in self.unit_group.sprites():
+            self.update_unit_rect(unit)
         self.unit_group.draw(self.screen)
         
         # If there's a selected unit, highlight it
