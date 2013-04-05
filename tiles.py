@@ -245,6 +245,16 @@ class TileMap(Sprite):
             y * self._tile_height
         )
         
+    def tile_data(self, coords):
+        """
+        Returns the tile data for a given tile.
+        """
+        if not self._tile_exists(coords): return False
+        
+        index = self._tile_index(coords)
+        
+        return tile_types[self.tiles[index]]
+        
     def is_passable(self, coords):
         """
         Returns true if a given tile index is passable, and false
@@ -252,9 +262,7 @@ class TileMap(Sprite):
         """
         if not self._tile_exists(coords): return False
         
-        index = self._tile_index(coords)
-        
-        return tile_types[self.tiles[index]].passable
+        return self.tile_data(coords).passable
         
     def set_highlight(self, colour, tiles):
         """
@@ -402,6 +410,7 @@ class TileMap(Sprite):
             todo.tie_breaker = lambda a,b: better_tile(a, b, start, end)
         
             cur, c = todo.pop_smallest()
+            cur_data = self.tile_data(cur)
             x, y = cur
             visited.add(cur)
             
@@ -421,14 +430,14 @@ class TileMap(Sprite):
                 
                 if n not in todo:
                     # we haven't looked at this tile yet, so calculate its costs
-                    g, h = costs[cur][0] + cost(cur), manhattan_dist(n, end)
+                    g, h = costs[cur][0] + cost(cur_data), manhattan_dist(n, end)
                     costs[n] = (g, h)
                     parents[n] = cur
                     todo.update(n, g + h)
                 else:
                     # if we've found a better path, update it
                     g, h = costs[n]
-                    new_g = costs[cur][0] + cost(cur)
+                    new_g = costs[cur][0] + cost(cur_data)
                     if new_g < g:
                         g = new_g
                         todo.update(n, g + h)
@@ -467,6 +476,7 @@ class TileMap(Sprite):
         
         while todo:
             cur, c = todo.pop_smallest()
+            cur_data = self.tile_data(cur)
             x, y = cur
             visited.add(cur)
             
@@ -489,7 +499,7 @@ class TileMap(Sprite):
                     continue
                 
                 # try updating the tile's cost
-                new_cost = c + cost(cur)
+                new_cost = c + cost(cur_data)
                 if todo.update(n, new_cost) and new_cost <= max_cost:
                     reachable.add(n)
         

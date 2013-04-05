@@ -74,8 +74,11 @@ class GUI(LayeredUpdates):
 
         # Set up unit information
         self.unit_group = pygame.sprite.Group()
-        self.add(self.unit_group)
         self.sel_unit = None
+        
+        # This directory keeps track of the unit in each tile
+        # key = tile position, value = unit
+        self._unit_directory = {}
         
         # Set up GUI
         self.buttons = [
@@ -123,22 +126,40 @@ class GUI(LayeredUpdates):
             line = map_file.readline()
         line = map_file.readline()
         
+        # Make an empty unit directory.
+        self._unit_directory.clear()
+        for x in range(w):
+            for y in range(h):
+                self._unit_directory[(x, y)] = None
+        
         # Create the units
         while line.find("UNITS END") < 0:
             line = line.rstrip()
             line = line.split(' ')
             unit_name = line[0]
             x, y = int(line[1]), int(line[2])
-            x, y = self.map.screen_coords((x, y))
+            screen_x, screen_y = self.map.screen_coords((x, y))
             
             if not unit_name in unit.unit_types:
                 raise Exception("No unit of name {} found!".format(unit_name))
             new_unit = unit.unit_types[unit_name]()
-            new_unit.rect.x = x
-            new_unit.rect.y = y
+            new_unit.rect.x = screen_x
+            new_unit.rect.y = screen_y
             self.unit_group.add(new_unit)
+            self._move_unit(new_unit, (x, y))
             
             line = map_file.readline()
+                        
+    def _move_unit(self, unit, new_pos):
+        """
+        Moves a unit within the directory.
+        NOTE: This does not change the unit's screen position!
+        """
+        old_pos = self.map.tile_coords((unit.rect.x, unit.rect.y))
+        
+        # Remove it from the old position
+        self._unit_directory[old_pos] = None
+        self._unit_directory[new_pos] = unit
         
     def on_click(self, e):
         """
@@ -153,7 +174,7 @@ class GUI(LayeredUpdates):
             # If this is in the map, we're dealing with units
             if self.map.rect.collidepoint(e.pos):
                 # get the unit at the mouseclick
-                unit = self.unit_at_pos(e.pos)
+                unit = self.unit_at_screen_pos(e.pos)
 
                 #TODO, this will need to be updated once we have a concept of ownership
                 # as well as attack/move states
@@ -174,20 +195,22 @@ class GUI(LayeredUpdates):
                 for button in self.buttons:
                     if self.get_button_rect(button).collidepoint(e.pos):
                         button.onClick()
-                
+                        
     def unit_at_pos(self, pos):
         """
-        Gets the unit at a specified position. ((x,y) tuple).
+        Gets the unit at a specified tile position ((x,y) tuple).
         Returns None if no unit.
         """
-        #iterate over all unit sprites
-        for unit in self.unit_group.sprites():
-            #determine if the click was inside the unit
-            if unit.rect.collidepoint(pos):
-                return unit
-
-        #return no unit
-        return None
+        return self._unit_directory[pos]
+                
+    def unit_at_screen_pos(self, pos):
+        """
+        Gets the unit at a specified screen position ((x,y) tuple).
+        Returns None if no unit.
+        """
+        # Get the unit's tile position.
+        tile_pos = self.map.tile_coords(pos)
+        return self.unit_at_pos(tile_pos)
 
     def draw(self):
         """
