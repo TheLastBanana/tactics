@@ -255,15 +255,6 @@ class TileMap(Sprite):
         
         return tile_types[self.tiles[index]]
         
-    def is_passable(self, coords):
-        """
-        Returns true if a given tile index is passable, and false
-        otherwise.
-        """
-        if not self._tile_exists(coords): return False
-        
-        return self.tile_data(coords).passable
-        
     def set_highlight(self, colour, tiles):
         """
         Sets the given list of tile coordinates to be highlighted in
