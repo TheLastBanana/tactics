@@ -13,7 +13,12 @@ class BaseUnit(Sprite):
     
     active_units = set()
     
-    def __init__(self):
+    def __init__(self,
+                 tile_x = None,
+                 tile_y = None,
+                 **keywords):
+        
+        
         self.health = 10
         self.speed = 8
         self._angle = 0
@@ -26,8 +31,8 @@ class BaseUnit(Sprite):
 
         self.image = self._base_image
         self.rect = self.image.get_rect()
-        self.tile_x = None
-        self.tile_y = None
+        self.tile_x = tile_x
+        self.tile_y = tile_y
         
     def activate(self):
         """
@@ -156,7 +161,7 @@ class BaseUnit(Sprite):
         Returns the unit's angle as a cardinal direcion
             (i.e. North, South, East, West).
         """
-        angle = abs(self._angle % 90)
+        angle = abs(self._angle % 360)
 
         if angle == 0:
             return "East"
