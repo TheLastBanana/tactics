@@ -26,7 +26,8 @@ class BaseUnit(Sprite):
 
         self.image = self._base_image
         self.rect = self.image.get_rect()
-        self.tile_rect = pygame.Rect(0, 0, 1, 1)
+        self.tile_x = None
+        self.tile_y = None
         
     def activate(self):
         """
