@@ -15,7 +15,7 @@ PAD = 6
 
 # RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
-MOVE_COLOR = (0, 0, 255, 100)
+MOVE_COLOR = (0, 0, 255, 255)
 
 # RGB colors for the GUI
 FONT_COLOR = (0, 0, 0)
@@ -42,7 +42,10 @@ class GUI(LayeredUpdates):
         # Determine where we can move.
         pos = self.map.tile_coords(
             (self.sel_unit.rect.x, self.sel_unit.rect.y))
-        movable = self.map.reachable_tiles(pos, self.sel_unit.speed)
+        movable = self.map.reachable_tiles(pos,
+                                           self.sel_unit.speed,
+                                           self.sel_unit.move_cost,
+                                           self.sel_unit.is_passable)
         
         # Highlight those squares
         self.map.clear_highlights()
@@ -149,7 +152,7 @@ class GUI(LayeredUpdates):
             self._move_unit(new_unit, (x, y))
             
             line = map_file.readline()
-                        
+
     def _move_unit(self, unit, new_pos):
         """
         Moves a unit within the directory.
@@ -267,10 +270,13 @@ class GUI(LayeredUpdates):
         line_num += 1
 
         #Is the tile passable?
-        self.draw_bar_text(
-            "Passable: {}".format(self.map.is_passable(coords)),
-            line_num)
-        line_num += 1
+        #We can only know if there's a unit currently selected
+        if self.sel_unit:
+            tile = self.map.tile_data(coords)
+            self.draw_bar_text(
+                "Passable: {}".format(self.sel_unit.is_passable(tile)),
+                line_num)
+            line_num += 1
 
         #divider
         self.draw_bar_div_line(line_num)
