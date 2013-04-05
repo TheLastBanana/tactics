@@ -341,50 +341,12 @@ class TileMap(Sprite):
                     self._tile_height
                 )
                 pygame.gfxdraw.box(self.image, tile_rect, colour)
-            
-    def load_from_file(self, filename):
-        """
-        Loads tile data in from a given file.
-        The file should be space-separated.
-        """
-        tile_file = open(filename, 'r')
-        
-        lines = tile_file.readlines()
-        if len(lines) != self._map_height:
-                raise Exception(
-                    "Expected {} rows of tiles, but got {}".format(
-                        self._map_height,
-                        len(lines)
-                    )
-                )
-        
-        # this will store the new set of tiles temporarily so that we can revert
-        # in case the read operation fails
-        new_tiles = []
-        
-        for line in lines:
-            line = line.rstrip()
-            line = line.split(' ')
-            
-            # there should be map_width tiles per line
-            if len(line) != self._map_width:
-                raise Exception(
-                    "Expected {} tiles per line, but got {}".format(
-                        self._map_width,
-                        len(line)
-                    )
-                )
-            
-            # add all the tiles
-            for c in line:
-                new_tiles.append(int(c))
-                
-        tile_file.close()
-        
-        # we loaded in the file properly, so copy it over to tiles
-        self.tiles = new_tiles[:]
-        
-    def find_path(self, start, end, cost = lambda x: 1):
+
+    def find_path(self,
+                  start,
+                  end,
+                  cost = lambda x: 1,
+                  passable = lambda x: False):
         """
         Returns the path between two points as a list of tile coordinates using
         the A* algorithm.
@@ -425,7 +387,7 @@ class TileMap(Sprite):
                 # skip it if it doesn't exist, if we've already checked it, or
                 # if it isn't passable
                 if ((not self._tile_exists(n)) or(n in visited) or
-                    (not self.is_passable(n))):
+                    (not passable(self.tile_data(n)))):
                     continue
                 
                 if n not in todo:
@@ -458,7 +420,11 @@ class TileMap(Sprite):
         
         return path
         
-    def reachable_tiles(self, start, max_cost, cost = lambda x: 1):
+    def reachable_tiles(self,
+                        start,
+                        max_cost,
+                        cost = lambda x: 1,
+                        passable = lambda x: False):
         """
         Returns a set of tiles which can be reached with a total cost of
         max_cost.
@@ -495,7 +461,7 @@ class TileMap(Sprite):
                 # skip it if it doesn't exist, if we've already checked it, or
                 # if it isn't passable
                 if ((not self._tile_exists(n)) or(n in visited) or
-                    (not self.is_passable(n))):
+                    (not passable(self.tile_data(n)))):
                     continue
                 
                 # try updating the tile's cost
