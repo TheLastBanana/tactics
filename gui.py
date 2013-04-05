@@ -15,7 +15,8 @@ PAD = 6
 
 # RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
-MOVE_COLOR = (0, 0, 255, 150)
+MOVE_COLOR_A = (0, 0, 210, 80)
+MOVE_COLOR_B = (75, 125, 255, 120)
 
 # RGB colors for the GUI
 FONT_COLOR = (0, 0, 0)
@@ -67,7 +68,8 @@ class GUI(LayeredUpdates):
         
         # Highlight those squares
         self.map.clear_highlights()
-        self.map.set_highlight(MOVE_COLOR, self._movable_tiles)
+        self.map.set_highlight(
+            "move", MOVE_COLOR_A, MOVE_COLOR_B, self._movable_tiles)
         
         # Set the current GUI mode
         self.change_mode(Modes.ChooseMove)
@@ -125,7 +127,7 @@ class GUI(LayeredUpdates):
         if self.mode == Modes.ChooseMove:
             # Reset the move markers
             self._movable_tiles = set()
-            self.map.remove_highlight(MOVE_COLOR)
+            self.map.remove_highlight("move")
             
         self.mode = new_mode
         

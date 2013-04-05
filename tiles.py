@@ -14,6 +14,8 @@ tile_types = {
     2:  Tile('water', 2, False)
 }
 
+HIGHLIGHT_RATE = 0.0025
+
 def manhattan_dist(a, b):
     """
     Returns the Manhattan distance between two points.
@@ -258,26 +260,42 @@ class TileMap(Sprite):
         
         return tile_types[self.tiles[index]]
         
-    def set_highlight(self, colour, tiles):
+    def set_highlight(self, name, colorA, colorB, tiles):
         """
-        Sets the given list of tile coordinates to be highlighted in
-        colour.
+        Sets the given list of tile coordinates to be highlighted in the given
+        color and wave between the first and second colors.
+        It will be stored under the given name.
         """
-        self._highlights[colour] = tiles
+        self._highlights[name] = (tiles, colorA, colorB)
         
-    def remove_highlight(self, colour):
+    def remove_highlight(self, name):
         """
         Removes highlights of the given colour. If the highlights do not
         exist, does nothing.
         """
-        if colour in self._highlights:
-            del self._highlights[colour]
+        if name in self._highlights:
+            del self._highlights[name]
             
     def clear_highlights(self):
         """
         Removes all highlights.
         """
         self._highlights.clear()
+        
+    def _get_highlight_color(self, colorA, colorB):
+        """
+        Returns the movement color, which changes based on time.
+        """
+        # This produces a sine wave effect between a and b.
+        sin = (math.sin(pygame.time.get_ticks() * HIGHLIGHT_RATE) + 1) * 0.5
+        effect = lambda a, b: a + sin * (b - a)
+        
+        r = effect(colorA[0], colorB[0])
+        g = effect(colorA[1], colorB[1])
+        b = effect(colorA[2], colorB[2])
+        a = effect(colorA[3], colorB[3])
+        
+        return (r, g, b, a)
         
     def update(self):
         """
@@ -307,6 +325,19 @@ class TileMap(Sprite):
             # draw the tile
             self.image.blit(self._sprite_sheet, (x, y), area)
             
+        # draw the highlights
+        for name, (tiles, colorA, colorB) in self._highlights.items():
+            for coord in tiles:
+                tile_rect = pygame.Rect(
+                    coord[0] * self._tile_width,
+                    coord[1] * self._tile_height,
+                    self._tile_width,
+                    self._tile_height
+                )
+                pygame.gfxdraw.box(self.image,
+                                   tile_rect,
+                                   self._get_highlight_color(colorA, colorB))
+            
         # draw the grid
         for x in range(0, self._map_width * self._tile_width, self._tile_width):
             pygame.gfxdraw.vline(
@@ -324,17 +355,6 @@ class TileMap(Sprite):
                 y,
                 self._grid_color
             )
-            
-        # draw the highlights
-        for colour, tiles in self._highlights.items():
-            for coord in tiles:
-                tile_rect = pygame.Rect(
-                    coord[0] * self._tile_width,
-                    coord[1] * self._tile_height,
-                    self._tile_width,
-                    self._tile_height
-                )
-                pygame.gfxdraw.box(self.image, tile_rect, colour)
 
     def find_path(self,
                   start,
