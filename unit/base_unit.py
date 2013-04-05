@@ -11,11 +11,14 @@ class BaseUnit(Sprite):
     extend.
     """
     
+    active_units = set()
+    
     def __init__(self):
         self.health = 10
         self.speed = 8
         self._angle = 0
         self._moving = False
+        self._active = False
     
         Sprite.__init__(self)
         
@@ -23,6 +26,23 @@ class BaseUnit(Sprite):
 
         self.image = self._base_image
         self.rect = self.image.get_rect()
+        self.tile_rect = pygame.Rect(0, 0, 1, 1)
+        
+    def activate(self):
+        """
+        Adds this unit to the active roster.
+        """
+        if not self._active:
+            self._active = True
+            BaseUnit.active_units.add(self)
+    
+    def deactivate(self):
+        """
+        Removes this unit from the active roster.
+        """
+        if self.active:
+            self._active = False
+            BaseUnit.active_units.remove(self)
 
     def update(self):
         """
@@ -39,12 +59,12 @@ class BaseUnit(Sprite):
             #There's a path to move on
             else:
                 #If we're at the next tile remove it
-                if self.rect.topleft == self._path[0]:
+                if self.tile_rect.topleft == self._path[0]:
                     self._path.pop(0)
 
                 #get values for calcs
                 path_x, path_y = self._path[0]
-                rect_x, rect_y = self.rect.topleft
+                rect_x, rect_y = self.tile_rect.topleft
 
                 #determine deltas
                 dx = helper.clamp(path_x - rect_x,
@@ -69,7 +89,7 @@ class BaseUnit(Sprite):
 
                 #set the new value
                 new_val = (rect_x + dx, rect_y + dy)
-                self.rect.topleft = new_val
+                self.tile_rect.topleft = new_val
                 
 
     def set_path(self, path):
