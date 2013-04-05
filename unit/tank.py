@@ -5,11 +5,13 @@ import pygame
 
 class Tank(BaseUnit):
     def __init__(self, **keywords):
+        #load the image for the base class.
         self._base_image = pygame.image.load("assets/tank.png")
 
         BaseUnit.__init__(self, **keywords)
 
-        self.angle = 0
+        self.health = 10
+        self.max_health = self.health
         self.speed = 10
         
     def move_cost(self, tile):
