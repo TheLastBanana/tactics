@@ -23,6 +23,12 @@ BAR_COLOR = (150, 150, 150)
 OUTLINE_COLOR = (50, 50, 50)
 HIGHLIGHT_COLOR = (255, 255, 255)
 
+# Possible GUI modes
+# http://stackoverflow.com/questions/702834/whats-the-common-practice-for-enums-
+# in-python
+class Modes:
+    Select, ChooseMove, Moving, ChooseAttack = range(4)
+
 # A container class which stores button information.
 # Each "slot" is a BUTTON_HEIGHT pixel space counting up from the bottom
 # of the screen.
@@ -42,11 +48,14 @@ class GUI(LayeredUpdates):
         # Determine where we can move.
         pos = self.map.tile_coords(
             (self.sel_unit.rect.x, self.sel_unit.rect.y))
-        movable = self.map.reachable_tiles(pos, self.sel_unit.speed)
+        self._movable_tiles = self.map.reachable_tiles(pos, self.sel_unit.speed)
         
         # Highlight those squares
         self.map.clear_highlights()
-        self.map.set_highlight(MOVE_COLOR, movable)
+        self.map.set_highlight(MOVE_COLOR, self._movable_tiles)
+        
+        # Set the current GUI mode
+        self.change_mode(Modes.ChooseMove)
             
     def attack_pressed(self):
         """
@@ -83,6 +92,27 @@ class GUI(LayeredUpdates):
 
         # Not line height, actually font size, but conveniently the same thing
         self.font = pygame.font.SysFont("Arial", FONT_SIZE)
+        
+        # We start in select mode
+        self.mode = Modes.Select
+        
+        # Tiles we can move to
+        self._movable_tiles = set()
+        
+    def change_mode(self, new_mode):
+        """
+        Changes the current mode.
+        """
+        if self.mode == new_mode:
+            return
+        
+        # Deal with the current mode
+        if self.mode == Modes.ChooseMove:
+            # Reset the move markers
+            self._movable_tiles = set()
+            self.map.remove_highlight(MOVE_COLOR)
+            
+        self.mode = new_mode
         
     def load_level(self, filename):
         """
@@ -152,23 +182,35 @@ class GUI(LayeredUpdates):
             and e.button == 1
             and pygame.mouse.get_focused()):
             
-            # If this is in the map, we're dealing with units
+            # If this is in the map, we're dealing with units or tiles
             if self.map.rect.collidepoint(e.pos):
                 # get the unit at the mouseclick
                 unit = self.unit_at_screen_pos(e.pos)
 
                 #TODO, this will need to be updated once we have a concept of ownership
                 # as well as attack/move states
+                if unit:
+                    self.change_mode(Modes.Select)
 
-                # clicking the same unit again deselects it
-                if unit == self.sel_unit:
-                    self.sel_unit = None
-                    self.map.clear_highlights()
+                    # clicking the same unit again deselects it
+                    if unit == self.sel_unit:
+                        self.sel_unit = None
 
-                # update the selected unit
-                elif unit and unit != self.sel_unit:
-                    self.sel_unit = unit
-                    self.map.clear_highlights()
+                    # update the selected unit
+                    elif unit and unit != self.sel_unit:
+                        self.sel_unit = unit
+                else:
+                    # No unit there, so a tile was clicked
+                    tile_pos = self.map.tile_coords(e.pos)
+                    
+                    # Move to the selected tile
+                    if (self.mode == Modes.ChooseMove and self.sel_unit
+                        and tile_pos in self._movable_tiles):
+                        self.mode = Modes.Moving
+                        self.sel_unit.set_path(
+                            self.map.find_path(
+                                self.sel_unit.tile_rect.topleft,
+                                tile_pos))
             
             # Otherwise, the user is interacting with the GUI panel
             else:
