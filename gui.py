@@ -42,8 +42,14 @@ class GUI(LayeredUpdates):
         """
         This is called when the move button is pressed.
         """
+        # Switch out of move mode if we're already in it.
+        if self.mode == Modes.ChooseMove:
+            self.change_mode(Modes.Select)
+            return
+        
         # If there no unit selected, nothing happens.
         if not self.sel_unit: return
+        
         # Determine where we can move.
         pos = self.map.tile_coords(
             (self.sel_unit.rect.x, self.sel_unit.rect.y))
@@ -52,6 +58,12 @@ class GUI(LayeredUpdates):
             self.sel_unit.speed,
             self.sel_unit.move_cost,
             self.sel_unit.is_passable)
+        
+        # We can't actually move to any tiles with units in them
+        for u in base_unit.BaseUnit.active_units:
+            u_pos = (u.tile_x, u.tile_y)
+            if u_pos in self._movable_tiles:
+                self._movable_tiles.remove(u_pos)
         
         # Highlight those squares
         self.map.clear_highlights()
@@ -196,14 +208,15 @@ class GUI(LayeredUpdates):
                 #TODO, this will need to be updated once we have a concept of ownership
                 # as well as attack/move states
                 if unit:
-                    self.change_mode(Modes.Select)
-
-                    # clicking the same unit again deselects it
+                    # clicking the same unit again deselects it and, if
+                    # necessary, resets select mode
                     if unit == self.sel_unit:
+                        self.change_mode(Modes.Select)
                         self.sel_unit = None
 
-                    # update the selected unit
-                    elif unit and unit != self.sel_unit:
+                    # select a new unit
+                    elif (unit and unit != self.sel_unit
+                        and self.mode == Modes.Select):
                         self.sel_unit = unit
                 else:
                     # No unit there, so a tile was clicked
