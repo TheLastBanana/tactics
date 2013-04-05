@@ -219,7 +219,9 @@ class GUI(LayeredUpdates):
                         self.sel_unit.set_path(
                             self.map.find_path(
                                 from_tile_pos,
-                                to_tile_pos))
+                                to_tile_pos,
+                                self.sel_unit.move_cost,
+                                self.sel_unit.is_passable))
             
             # Otherwise, the user is interacting with the GUI panel
             else:
