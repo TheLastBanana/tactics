@@ -221,8 +221,11 @@ class TileMap(Sprite):
         units. Returns -1 if the provided coordinates are invalid
         """
         if not self._tile_exists(coords): return -1
-        
-        return math.floor(coords[1]) * self._map_width + math.floor(coords[0])
+
+        #make sure to cast to int because input is sometimes floats
+        #There won't be rounding errors though because the numbers
+        #are just integers with .0 after
+        return int(coords[1]) * self._map_width + int(coords[0])
         
     def tile_coords(self, screen_coords):
         """
