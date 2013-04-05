@@ -222,7 +222,7 @@ class TileMap(Sprite):
         """
         if not self._tile_exists(coords): return -1
         
-        return coords[1] * self._map_width + coords[0]
+        return math.floor(coords[1]) * self._map_width + math.floor(coords[0])
         
     def tile_coords(self, screen_coords):
         """
