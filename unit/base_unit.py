@@ -65,18 +65,18 @@ class BaseUnit(Sprite):
             #There's a path to move on
             else:
                 #If we're at the next tile remove it
-                if self.tile_rect.topleft == self._path[0]:
+                if (self.tile_x, self.tile_y) == self._path[0]:
                     self._path.pop(0)
+                    if not self._path: return
 
                 #get values for calcs
                 path_x, path_y = self._path[0]
-                rect_x, rect_y = self.tile_rect.topleft
 
                 #determine deltas
-                dx = helper.clamp(path_x - rect_x,
+                dx = helper.clamp(path_x - self.tile_x,
                                   -FRAME_MOVE_SPEED,
                                   FRAME_MOVE_SPEED)
-                dy = helper.clamp(path_y - rect_y,
+                dy = helper.clamp(path_y - self.tile_y,
                                   -FRAME_MOVE_SPEED,
                                   FRAME_MOVE_SPEED)
                 
@@ -94,8 +94,8 @@ class BaseUnit(Sprite):
                     self.set_angle(270)
 
                 #set the new value
-                new_val = (rect_x + dx, rect_y + dy)
-                self.tile_rect.topleft = new_val
+                self.tile_x += dx
+                self.tile_y += dy
 
     def set_path(self, path):
         """

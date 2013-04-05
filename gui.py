@@ -180,6 +180,9 @@ class GUI(LayeredUpdates):
         This is called when a click event occurs.
         e is the click event.
         """
+        # Don't react when in move mode.
+        if self.mode == Modes.Moving: return
+        
         # make sure we have focus and that it was the left mouse button
         if (e.type == pygame.MOUSEBUTTONUP
             and e.button == 1
@@ -209,7 +212,7 @@ class GUI(LayeredUpdates):
                     # Move to the selected tile
                     if (self.mode == Modes.ChooseMove and self.sel_unit
                         and to_tile_pos in self._movable_tiles):
-                        self.mode = Modes.Moving
+                        self.change_mode(Modes.Moving)
                         
                         #the tile position the unit is at
                         from_tile_pos = (self.sel_unit.tile_x,
@@ -219,7 +222,9 @@ class GUI(LayeredUpdates):
                         self.sel_unit.set_path(
                             self.map.find_path(
                                 from_tile_pos,
-                                to_tile_pos))
+                                to_tile_pos,
+                                self.sel_unit.move_cost,
+                                self.sel_unit.is_passable))
             
             # Otherwise, the user is interacting with the GUI panel
             else:
@@ -268,6 +273,10 @@ class GUI(LayeredUpdates):
         """
         LayeredUpdates.update(self)
         self.unit_group.update()
+        
+        if self.mode == Modes.Moving:
+            if (not self.sel_unit) or (not self.sel_unit.is_moving()):
+                self.change_mode(Modes.Select)
 
     def draw(self):
         """
