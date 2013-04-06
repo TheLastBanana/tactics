@@ -20,22 +20,25 @@ class BaseUnit(Sprite):
                  angle = 0,
                  activate = False,
                  **keywords):
-        
-        #Some default values so that nothing complains when trying to
-        #assign later.
-        self.team = team
-        self._angle = angle
-        self._moving = False
-        self._active = False
-    
+
         Sprite.__init__(self)
         
-        self._path = []
-
-        self.image = pygame.transform.rotate(self._base_image, self._angle)
-        self.rect = self.image.get_rect()
+        #Take the keywords off
+        self.team = team
         self.tile_x = tile_x
         self.tile_y = tile_y
+        self._angle = angle
+        
+        #Some default values so that nothing complains when trying to
+        #assign later
+        self._moving = False
+        self._active = False
+        self._path = []
+        self.turn_state = [False, False]
+        
+        #set required pygame things.
+        self.image = pygame.transform.rotate(self._base_image, self._angle)
+        self.rect = self.image.get_rect()
         
         if activate:
             self.activate()
