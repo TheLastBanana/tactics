@@ -1,4 +1,5 @@
 30x30
+2
 
 MAP START
 0 0 0 0 1 0 0 1 0 0 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
@@ -34,6 +35,6 @@ MAP START
 MAP END
 
 UNITS START
-Tank 1 0 0 0
-Tank 2 20 20 90
+Tank 0 0 0 0
+Tank 1 20 20 90
 UNITS END
