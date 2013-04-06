@@ -8,8 +8,10 @@ class Tank(BaseUnit):
         #load the image for the base class.
         self._base_image = pygame.image.load("assets/tank.png")
 
+        #load the base class
         BaseUnit.__init__(self, **keywords)
 
+        #set unit specific things.
         self.health = 10
         self.max_health = self.health
         self.speed = 10
