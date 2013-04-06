@@ -48,8 +48,10 @@ class GUI(LayeredUpdates):
             self.change_mode(Modes.Select)
             return
         
-        # If there no unit selected, nothing happens.
+        # If there is no unit selected, nothing happens.
         if not self.sel_unit: return
+        # If the unit has already moved nothing happens.
+        elif self.sel_unit.turn_state[0] == True: return
         
         # Determine where we can move.
         pos = self.map.tile_coords(
@@ -79,6 +81,24 @@ class GUI(LayeredUpdates):
         This is called when the attack button is pressed.
         """
         print("BOOM")
+        
+    def end_turn_pressed(self):
+        """
+        This is called when a player wants to end their turn.
+        Advances
+        """
+        # advance turn
+        self.current_turn = (self.current_turn + 1) % self.num_teams
+        
+        # reset game mode
+        self.change_mode(Modes.Select)
+        
+        # unselect unit
+        self.sel_unit = None
+        
+        for unit in self.unit_group.sprites():
+            if unit.team == self.current_turn:
+                unit.turn_state = [False, False]
 
     def __init__(self, screen_rect, bg_color):
         """
@@ -98,6 +118,10 @@ class GUI(LayeredUpdates):
         self.bg_color = bg_color
         self.map = None
 
+        # Set up team information
+        self.num_teams = None
+        self.current_turn = 0
+
         # Set up unit information
         self.unit_group = pygame.sprite.Group()
         self.sel_unit = None
@@ -105,7 +129,8 @@ class GUI(LayeredUpdates):
         # Set up GUI
         self.buttons = [
             Button(0, "MOVE", self.move_pressed),
-            Button(1, "ATTACK", self.attack_pressed)]
+            Button(1, "ATTACK", self.attack_pressed),
+            Button(2, "END TURN", self.end_turn_pressed)]
 
         # Not line height, actually font size, but conveniently the same thing
         self.font = pygame.font.SysFont("Arial", FONT_SIZE)
@@ -142,6 +167,10 @@ class GUI(LayeredUpdates):
         # Get the map size
         line = map_file.readline()
         w, h = [int(x) for x in line.split('x')]
+        
+        # Get the number of teams
+        line = map_file.readline()
+        self.num_teams = int(line)
         
         # Move up to the start of the map
         while line.find("MAP START") < 0:
@@ -220,17 +249,22 @@ class GUI(LayeredUpdates):
                         self.sel_unit = None
 
                     # select a new unit
-                    elif (unit and unit != self.sel_unit
-                        and self.mode == Modes.Select):
+                    elif (self.mode == Modes.Select and
+                          unit.team == self.current_turn):
                         self.sel_unit = unit
                 else:
                     # No unit there, so a tile was clicked
                     to_tile_pos = self.map.tile_coords(e.pos)
                     
                     # Move to the selected tile
-                    if (self.mode == Modes.ChooseMove and self.sel_unit
-                        and to_tile_pos in self._movable_tiles):
+                    if (self.mode == Modes.ChooseMove and
+                        self.sel_unit and
+                        to_tile_pos in self._movable_tiles):
+                        
+                        #Change the game state to show that there
+                        # was a movement.
                         self.change_mode(Modes.Moving)
+                        self.sel_unit.turn_state[0] = True
                         
                         #the tile position the unit is at
                         from_tile_pos = (self.sel_unit.tile_x,
