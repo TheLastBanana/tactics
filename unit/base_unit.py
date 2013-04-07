@@ -12,7 +12,7 @@ class BaseUnit(Sprite):
     extend.
     """
     
-    active_units = set()
+    active_units = pygame.sprite.Group()
     
     def __init__(self,
                  team = -1,

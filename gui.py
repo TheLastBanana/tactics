@@ -102,7 +102,7 @@ class GUI(LayeredUpdates):
         # unselect unit
         self.sel_unit = None
         
-        for unit in self.unit_group.sprites():
+        for unit in base_unit.BaseUnit.active_units:
             if unit.team == self.current_turn:
                 unit.turn_state = [False, False]
 
@@ -128,8 +128,7 @@ class GUI(LayeredUpdates):
         self.num_teams = None
         self.current_turn = 0
 
-        # Set up unit information
-        self.unit_group = pygame.sprite.Group()
+        # The currently selected unit
         self.sel_unit = None
         
         # Set up GUI
@@ -223,7 +222,6 @@ class GUI(LayeredUpdates):
             
             # Add the unit to the update group and set its display rect
             self.update_unit_rect(new_unit)
-            self.unit_group.add(new_unit)
             
             line = map_file.readline()
         
@@ -330,7 +328,7 @@ class GUI(LayeredUpdates):
         Update everything in the group.
         """
         LayeredUpdates.update(self)
-        self.unit_group.update()
+        base_unit.BaseUnit.active_units.update()
         
         if self.mode == Modes.Moving:
             if (not self.sel_unit) or (not self.sel_unit.is_moving()):
@@ -347,9 +345,9 @@ class GUI(LayeredUpdates):
         LayeredUpdates.draw(self, self.screen)
         
         # draw units
-        for unit in self.unit_group.sprites():
+        for unit in base_unit.BaseUnit.active_units:
             self.update_unit_rect(unit)
-        self.unit_group.draw(self.screen)
+        base_unit.BaseUnit.active_units.draw(self.screen)
         
         # If there's a selected unit, highlight it
         if self.sel_unit:
