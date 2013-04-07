@@ -94,7 +94,7 @@ class GUI(LayeredUpdates):
         Advances to the next turn.
         """
         # advance turn
-        self.current_turn = (self.current_turn + 1) % self.num_teams
+        self.current_turn += 1
         
         # reset game mode
         self.change_mode(Modes.Select)
@@ -102,8 +102,9 @@ class GUI(LayeredUpdates):
         # unselect unit
         self.sel_unit = None
         
+        # Reset the turn states of all units
         for unit in base_unit.BaseUnit.active_units:
-            if unit.team == self.current_turn:
+            if unit.team == self.get_cur_team():
                 unit.turn_state = [False, False]
 
     def __init__(self, screen_rect, bg_color):
@@ -145,6 +146,18 @@ class GUI(LayeredUpdates):
         
         # Tiles we can move to
         self._movable_tiles = set()
+        
+    def get_cur_team(self):
+        """
+        Gets the current team based on the turn.
+        """
+        return (self.current_turn) % self.num_teams
+        
+    def get_cur_day(self):
+        """
+        Gets the current day based on the turn.
+        """
+        return (self.current_turn) // self.num_teams + 1
         
     def change_mode(self, new_mode):
         """
@@ -242,9 +255,7 @@ class GUI(LayeredUpdates):
             if self.map.rect.collidepoint(e.pos):
                 # get the unit at the mouseclick
                 unit = self.unit_at_screen_pos(e.pos)
-
-                #TODO, this will need to be updated once we have a concept of ownership
-                # as well as attack/move states
+                
                 if unit:
                     # clicking the same unit again deselects it and, if
                     # necessary, resets select mode
@@ -254,7 +265,7 @@ class GUI(LayeredUpdates):
 
                     # select a new unit
                     elif (self.mode == Modes.Select and
-                          unit.team == self.current_turn):
+                          unit.team == self.get_cur_team()):
                         self.sel_unit = unit
                 else:
                     # No unit there, so a tile was clicked
@@ -379,9 +390,12 @@ class GUI(LayeredUpdates):
         pygame.draw.rect(self.screen, OUTLINE_COLOR, outlineRect, 2)
         
         #Title for turn info
+        self.draw_bar_title("DAY {}".format(self.get_cur_day()), line_num)
+        line_num += 1
+        
         self.draw_bar_title(
             "TEAM {}'S TURN".format(
-                TEAM_NAME[self.current_turn].upper()),
+                TEAM_NAME[self.get_cur_team()].upper()),
             line_num)
         line_num += 1
         
