@@ -145,17 +145,22 @@ class BaseUnit(Sprite):
         """
         Returns the cost of a unit moving over a certain tile.
         
-        Must be implemented by subclasses.
+        Override this for subclasses, perhaps using this as the default value.
         """
-        pass
+        return 1
         
-    def is_passable(self, tile):
+    def is_passable(self, tile, pos):
         """
         Returns whether or not a unit can move over a certain tile.
+        Position is also passed so it can be checked for other units.
         
-        Must be implemented by subclasses.
+        Override this for subclasses, perhaps using this as the default value.
         """
-        pass
+        #If there's no tile there (i.e. mouse is off screen)
+        if not tile:
+            return False
+        
+        return tile.passable
         
     def is_moving(self):
         """

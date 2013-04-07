@@ -22,17 +22,21 @@ class Tank(BaseUnit):
         """
         if tile.type == 'plains':
             return 1
+            
+        return BaseUnit.move_cost(self, tile)
         
-    def is_passable(self, tile):
+    def is_passable(self, tile, pos):
         """
         Returns whether or not this unit can move over a certain tile.
         """
-        #If there's no tile there (ie mouse is off screen)
+        # If there's no tile there (i.e. mouse is off screen)
         if not tile:
             return False
         
         if tile.type == 'plains':
             return True
-        return False
+        
+        # Return default
+        return BaseUnit.is_passable(self, tile, pos)
 
 unit.unit_types["Tank"] = Tank

@@ -406,7 +406,8 @@ class GUI(LayeredUpdates):
         if self.sel_unit:
             tile = self.map.tile_data(coords)
             self.draw_bar_text(
-                "Passable: {}".format(self.sel_unit.is_passable(tile)),
+                "Passable: {}".format(self.sel_unit.is_passable(
+                    tile, coords)),
                 line_num)
             line_num += 1
 

@@ -401,12 +401,13 @@ class TileMap(Sprite):
                 # skip it if it doesn't exist, if we've already checked it, or
                 # if it isn't passable
                 if ((not self._tile_exists(n)) or(n in visited) or
-                    (not passable(self.tile_data(n)))):
+                    (not passable(self.tile_data(n), n))):
                     continue
                 
                 if n not in todo:
                     # we haven't looked at this tile yet, so calculate its costs
-                    g, h = costs[cur][0] + cost(cur_data), manhattan_dist(n, end)
+                    g = costs[cur][0] + cost(cur_data)
+                    h = manhattan_dist(n, end)
                     costs[n] = (g, h)
                     parents[n] = cur
                     todo.update(n, g + h)
@@ -475,7 +476,7 @@ class TileMap(Sprite):
                 # skip it if it doesn't exist, if we've already checked it, or
                 # if it isn't passable
                 if ((not self._tile_exists(n)) or(n in visited) or
-                    (not passable(self.tile_data(n)))):
+                    (not passable(self.tile_data(n), n))):
                     continue
                 
                 # try updating the tile's cost
