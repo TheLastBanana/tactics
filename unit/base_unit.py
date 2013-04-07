@@ -4,6 +4,7 @@ import helper
 from pygame.sprite import Sprite
 
 FRAME_MOVE_SPEED = 3/20
+SIZE = 20
 
 class BaseUnit(Sprite):
     """
@@ -37,11 +38,29 @@ class BaseUnit(Sprite):
         self.turn_state = [False, False]
         
         #set required pygame things.
-        self.image = pygame.transform.rotate(self._base_image, self._angle)
-        self.rect = self.image.get_rect()
+        self.image = None
+        self.rect = pygame.Rect(0, 0, SIZE, SIZE)
+        self._update_image()
         
         if activate:
             self.activate()
+                
+    def _update_image(self):
+        """
+        Re-renders the unit's image.
+        """
+        # Pick out the right sprite depending on the team
+        subrect = pygame.Rect(self.team * SIZE,
+                              0,
+                              self.rect.w,
+                              self.rect.h)
+        try:
+            subsurf = self._base_image.subsurface(subrect)
+        except:
+            raise Exception(
+                "Class {} does not have a sprite for team {}!".format(
+                    self.__class__.__name__, self.team))
+        self.image = pygame.transform.rotate(subsurf, self._angle)
         
     def activate(self):
         """
@@ -151,7 +170,7 @@ class BaseUnit(Sprite):
         """
         if self._angle == angle: return
         self._angle = angle
-        self.image = pygame.transform.rotate(self._base_image, self._angle)
+        self._update_image()
 
     def get_speed_str(self):
         """
