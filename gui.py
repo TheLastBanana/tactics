@@ -24,6 +24,12 @@ BAR_COLOR = (150, 150, 150)
 OUTLINE_COLOR = (50, 50, 50)
 HIGHLIGHT_COLOR = (255, 255, 255)
 
+# Names for the different teams
+TEAM_NAME = {
+    0: "green",
+    1: "red"
+}
+
 # Possible GUI modes
 # http://stackoverflow.com/questions/702834/whats-the-common-practice-for-enums-
 # in-python
@@ -84,8 +90,8 @@ class GUI(LayeredUpdates):
         
     def end_turn_pressed(self):
         """
-        This is called when a player wants to end their turn.
-        Advances
+        This is called when the end turn button is pressed.
+        Advances to the next turn.
         """
         # advance turn
         self.current_turn = (self.current_turn + 1) % self.num_teams
@@ -373,6 +379,17 @@ class GUI(LayeredUpdates):
             self.screen.get_height() - 1)
         pygame.draw.rect(self.screen, BAR_COLOR, barRect)
         pygame.draw.rect(self.screen, OUTLINE_COLOR, outlineRect, 2)
+        
+        #Title for turn info
+        self.draw_bar_title(
+            "TEAM {}'S TURN".format(
+                TEAM_NAME[self.current_turn].upper()),
+            line_num)
+        line_num += 1
+        
+        #divider
+        self.draw_bar_div_line(line_num)
+        line_num += 1
 
         #title for tile section
         self.draw_bar_title("TILE INFO", line_num)
