@@ -44,6 +44,18 @@ class BaseUnit(Sprite):
         
         if activate:
             self.activate()
+            
+    @staticmethod
+    def get_unit_at_pos(pos):
+        """
+        Returns the active unit at the given tile position, or None if no unit
+        is present.
+        """
+        for u in BaseUnit.active_units:
+            if (u.tile_x, u.tile_y) == pos:
+                return u
+        
+        return None
                 
     def _update_image(self):
         """

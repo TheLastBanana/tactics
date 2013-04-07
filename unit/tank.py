@@ -32,6 +32,11 @@ class Tank(BaseUnit):
         # If there's no tile there (i.e. mouse is off screen)
         if not tile:
             return False
+            
+        # We can't pass through enemy units.
+        u = BaseUnit.get_unit_at_pos(pos)
+        if u and u.team != self.team:
+            return False
         
         if tile.type == 'plains':
             return True
