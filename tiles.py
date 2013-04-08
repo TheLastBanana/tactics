@@ -156,6 +156,31 @@ class TileMap(Sprite):
         #are just integers with .0 after
         return int(coords[1]) * self._map_width + int(coords[0])
         
+    def _get_highlight_color(self, colorA, colorB):
+        """
+        Returns the movement color, which changes based on time.
+        """
+        # This produces a sine wave effect between a and b.
+        sin = (math.sin(pygame.time.get_ticks() * HIGHLIGHT_RATE) + 1) * 0.5
+        effect = lambda a, b: a + sin * (b - a)
+        
+        r = effect(colorA[0], colorB[0])
+        g = effect(colorA[1], colorB[1])
+        b = effect(colorA[2], colorB[2])
+        a = effect(colorA[3], colorB[3])
+        
+        return (r, g, b, a)
+        
+    def get_tile_size(self):
+        """
+        Returns a tuple containing a tile's width and height within this map.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t.get_tile_size()
+        (20, 20)
+        """
+        return (self._tile_width, self._tile_height)
+        
     def tile_coords(self, screen_coords):
         """
         Returns the tile coordinates within this TileMap that the given screen
@@ -254,21 +279,6 @@ class TileMap(Sprite):
         Removes all highlights.
         """
         self._highlights.clear()
-        
-    def _get_highlight_color(self, colorA, colorB):
-        """
-        Returns the movement color, which changes based on time.
-        """
-        # This produces a sine wave effect between a and b.
-        sin = (math.sin(pygame.time.get_ticks() * HIGHLIGHT_RATE) + 1) * 0.5
-        effect = lambda a, b: a + sin * (b - a)
-        
-        r = effect(colorA[0], colorB[0])
-        g = effect(colorA[1], colorB[1])
-        b = effect(colorA[2], colorB[2])
-        a = effect(colorA[3], colorB[3])
-        
-        return (r, g, b, a)
         
     def update(self):
         """
