@@ -401,8 +401,8 @@ class TileMap(Sprite):
 def find_path(tilemap,
                 start,
                 end,
-                cost = lambda x: 1,
-                      passable = lambda x, y: x.passable):
+                cost = lambda tile: 1,
+                passable = lambda tile, pos: tile.passable):
     """
     Returns the path between two points as a list of tile coordinates using
     the A* algorithm.
@@ -498,8 +498,8 @@ def find_path(tilemap,
 def reachable_tiles(tilemap,
                       start,
                       max_cost,
-                      cost = lambda x: 1,
-                      passable = lambda x, y: x.passable):
+                      cost = lambda tile: 1,
+                      passable = lambda tile, pos: tile.passable):
     """
     Returns a set of tiles which can be reached with a total cost of
     max_cost.
