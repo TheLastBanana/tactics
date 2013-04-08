@@ -128,6 +128,9 @@ class GUI(LayeredUpdates):
         # Highlight the attackable tiles
         self.map.set_highlight(
             "attack", ATK_COLOR_A, ATK_COLOR_B, in_range)
+            
+        # Reset the reticle blinking
+        self._reticle.reset()
         
         # Set the current GUI mode
         self.change_mode(Modes.ChooseAttack)
