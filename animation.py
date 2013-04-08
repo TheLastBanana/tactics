@@ -67,3 +67,9 @@ class Animation(Sprite):
         
         # Update the actual image
         self._update_image()
+        
+    def reset(self):
+        """
+        Resets the animation to its first frame.
+        """
+        self.frame = 0
