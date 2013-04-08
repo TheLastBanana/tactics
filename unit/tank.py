@@ -5,9 +5,11 @@ import pygame
 import math
 
 class Tank(BaseUnit):
+    sprite = pygame.image.load("assets/tank.png")
+    
     def __init__(self, **keywords):
         #load the image for the base class.
-        self._base_image = pygame.image.load("assets/tank.png")
+        self._base_image = Tank.sprite
 
         #load the base class
         BaseUnit.__init__(self, **keywords)
