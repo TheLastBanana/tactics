@@ -137,36 +137,6 @@ def better_tile(a, b, start, end):
 class TileMap(Sprite):
     """
     A class which renders a grid of tiles from a spritesheet.
-        
-    Example use:
-    >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
-    >>> t.tiles = [0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0]
-    
-    >>> t.tile_coords((45, 22))
-    (2, 1)
-    >>> t.screen_coords((3, 4))
-    (60, 80)
-    
-    >>> find_path(t, (0, 0), (4, 4))
-    [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
-    >>> find_path(t, (0, 0), (5, 5))
-    []
-    
-    >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
-    >>> t.tiles = [0, 0, 0, 0, 1, 0,\
-                   0, 1, 1, 1, 0, 0,\
-                   0, 0, 0, 0, 1, 0,\
-                   0, 1, 1, 0, 1, 0,\
-                   0, 0, 1, 0, 0, 0,\
-                   1, 0, 0, 0, 1, 0]
-   
-    >>> find_path(t, (2, 0), (4, 1))
-    [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), \
-(3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
     """
     
     def __init__(self, sheet_name, tile_width, tile_height,
@@ -203,6 +173,10 @@ class TileMap(Sprite):
     def _tile_count(self):
         """
         Returns the number of tiles on the map.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t._tile_count()
+        25
         """
         return self._map_width * self._map_height
         
@@ -210,12 +184,24 @@ class TileMap(Sprite):
         """
         Returns a tile's coordinates in tile units within the map given its
         index in the list.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t._tile_position(12)
+        (2, 2)
         """
         return (index % self._map_width, index // self._map_width)
         
     def _tile_exists(self, coords):
         """
         Returns true if a tile exists, or false if it doesn't
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t._tile_exists((2, 2))
+        True
+        >>> t._tile_exists((-2, -1))
+        False
+        >>> t._tile_exists((6, 7))
+        False
         """
         return not (
             coords[0] < 0 or
@@ -226,7 +212,11 @@ class TileMap(Sprite):
     def _tile_index(self, coords):
         """
         Returns a tile's index in the list given its tile coordinates in tile
-        units. Returns -1 if the provided coordinates are invalid
+        units. Returns -1 if the provided coordinates are invalid.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t._tile_index((2, 2))
+        12
         """
         if not self._tile_exists(coords): return -1
 
@@ -239,6 +229,10 @@ class TileMap(Sprite):
         """
         Returns the tile coordinates within this TileMap that the given screen
         coordinates fall into.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t.tile_coords((45, 22))
+        (2, 1)
         """
         x, y = screen_coords
         return (
@@ -249,6 +243,10 @@ class TileMap(Sprite):
     def screen_coords(self, tile_coords):
         """
         Returns the screen coordinates of a given tile.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t.screen_coords((3, 4))
+        (60, 80)
         """
         x, y = tile_coords
         return (
@@ -259,6 +257,15 @@ class TileMap(Sprite):
     def tile_data(self, coords):
         """
         Returns the tile data for a given tile.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 2, 2)
+        >>> t.tiles = [0, 0,\
+                       0, 1]
+        >>> t.tile_data((0, 0)) == tile_types[0]
+        True
+        >>> t.tile_data((1, 1)) == tile_types[1]
+        True
+        
         """
         if not self._tile_exists(coords): return False
         
@@ -270,6 +277,17 @@ class TileMap(Sprite):
         """
         Returns all neighbour coordinates to a given tile. Does not return
         coordinates which do not exist.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20, 3, 3)
+        >>> t.tiles = [0, 0, 0,\
+                       0, 0, 0,\
+                       0, 0, 0]
+        >>> t.tile_neighbours((0, 0))
+        [(1, 0), (0, 1)]
+        >>> t.tile_neighbours((2, 2))
+        [(2, 1), (1, 2)]
+        >>> t.tile_neighbours((1, 1))
+        [(1, 0), (2, 1), (0, 1), (1, 2)]
         """
         x, y = coords
         
@@ -392,6 +410,31 @@ def find_path(tilemap,
     
     Code based on algorithm described in:
     http://www.policyalmanac.org/games/aStarTutorial.htm
+    
+    Example use:
+    >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+    >>> t.tiles = [0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0]
+    
+    >>> find_path(t, (0, 0), (4, 4))
+    [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
+    >>> find_path(t, (0, 0), (5, 5))
+    []
+    
+    >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
+    >>> t.tiles = [0, 0, 0, 0, 1, 0,\
+                   0, 1, 1, 1, 0, 0,\
+                   0, 0, 0, 0, 1, 0,\
+                   0, 1, 1, 0, 1, 0,\
+                   0, 0, 1, 0, 0, 0,\
+                   1, 0, 0, 0, 1, 0]
+   
+    >>> find_path(t, (2, 0), (4, 1))
+    [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), \
+(3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
     """
     # tiles to check (tuples of (x, y), cost)
     todo = pqueue.PQueue()
@@ -460,6 +503,31 @@ def reachable_tiles(tilemap,
     """
     Returns a set of tiles which can be reached with a total cost of
     max_cost.
+    
+    Example use:
+    >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+    >>> t.tiles = [0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0]
+    
+    >>> reachable_tiles(t, (2, 2), 2) == set([(2, 0), (1, 1), (2, 1), (3, 1), \
+        (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (1, 3), (2, 3), (3, 3), \
+        (2, 4)])
+    True
+    
+    >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
+    >>> t.tiles = [0, 0, 0, 0, 1, 0,\
+                   0, 1, 1, 1, 0, 0,\
+                   0, 0, 0, 0, 1, 0,\
+                   0, 1, 1, 0, 1, 0,\
+                   0, 0, 1, 0, 0, 0,\
+                   1, 0, 0, 0, 1, 0]
+   
+    >>> reachable_tiles(t, (2, 0), 6) == set([(3, 0), (2, 0), (1, 0), \
+        (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 2)])
+    True
     """
     # tiles to check (tuples of x, y)
     todo = pqueue.PQueue()
