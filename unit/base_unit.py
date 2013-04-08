@@ -180,6 +180,20 @@ class BaseUnit(Sprite):
         
         return tile.passable
         
+    def tiles_in_range(self, from_tile, from_pos):
+        """
+        Returns a set of all tile coordinates in range of the given tile.
+        """
+        from_x, from_y = from_pos
+        r = self.get_atk_range(from_tile)
+        tiles = set()
+        
+        for x in range(int(from_x - r), int(from_x + r)):
+            for y in range(int(from_y - r), int(from_y + r)):
+                # This is in range
+                if helper.manhattan_dist((from_pos), (x, y)) <= r:
+                    tiles.add((x, y))
+        
     def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
         """
         Returns whether the given tile is attackable.
