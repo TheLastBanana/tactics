@@ -15,8 +15,11 @@ PAD = 6
 
 # RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
+TARGET_COLOR = (255, 255, 255, 150)
 MOVE_COLOR_A = (0, 0, 210, 80)
 MOVE_COLOR_B = (75, 125, 255, 120)
+ATK_COLOR_A = (255, 0, 0, 140)
+ATK_COLOR_B = (255, 125, 75, 180)
 
 # RGB colors for the GUI
 FONT_COLOR = (0, 0, 0)
@@ -60,8 +63,8 @@ class GUI(LayeredUpdates):
         elif self.sel_unit.turn_state[0] == True: return
         
         # Determine where we can move.
-        pos = self.map.tile_coords(
-            (self.sel_unit.rect.x, self.sel_unit.rect.y))
+        pos = (self.sel_unit.tile_x, self.sel_unit.tile_y)
+        
         self._movable_tiles = tiles.reachable_tiles(
             self.map,
             pos,
@@ -76,7 +79,6 @@ class GUI(LayeredUpdates):
                 self._movable_tiles.remove(u_pos)
         
         # Highlight those squares
-        self.map.clear_highlights()
         self.map.set_highlight(
             "move", MOVE_COLOR_A, MOVE_COLOR_B, self._movable_tiles)
         
@@ -87,7 +89,39 @@ class GUI(LayeredUpdates):
         """
         This is called when the attack button is pressed.
         """
-        print("BOOM")
+        # Switch out of move mode if we're already in it.
+        if self.mode == Modes.ChooseAttack:
+            self.change_mode(Modes.Select)
+            return
+        
+        # If there is no unit selected, nothing happens.
+        if not self.sel_unit: return
+        # If the unit has already attacked, nothing happens.
+        elif self.sel_unit.turn_state[1] == True: return
+        
+        # Get information about the unit and its location.
+        unit_pos = (self.sel_unit.tile_x, self.sel_unit.tile_y)
+        unit_tile = self.map.tile_data(unit_pos)
+        
+        # These are all the tiles in range of the unit's attack.
+        in_range = self.sel_unit.tiles_in_range(unit_tile, unit_pos)
+        
+        # Determine which tiles the unit can actually attack.
+        for check_pos in in_range:
+            check_tile = self.map.tile_data(check_pos)
+            if self.sel_unit.is_attackable(
+                unit_tile,
+                unit_pos,
+                check_tile,
+                check_pos):
+                self._attackable_tiles.add(check_pos)
+        
+        # Highlight the attackable tiles
+        self.map.set_highlight(
+            "attack", ATK_COLOR_A, ATK_COLOR_B, in_range)
+        
+        # Set the current GUI mode
+        self.change_mode(Modes.ChooseAttack)
         
     def end_turn_pressed(self):
         """
@@ -145,8 +179,9 @@ class GUI(LayeredUpdates):
         # We start in select mode
         self.mode = Modes.Select
         
-        # Tiles we can move to
+        # Tiles we can move to/attack
         self._movable_tiles = set()
+        self._attackable_tiles = set()
         
     def get_cur_team(self):
         """
@@ -172,6 +207,12 @@ class GUI(LayeredUpdates):
             # Reset the move markers
             self._movable_tiles = set()
             self.map.remove_highlight("move")
+        
+        # Deal with the current mode
+        if self.mode == Modes.ChooseAttack:
+            # Reset the move markers
+            self._attackable_tiles = set()
+            self.map.remove_highlight("attack")
             
         self.mode = new_mode
         
@@ -362,12 +403,23 @@ class GUI(LayeredUpdates):
             self.update_unit_rect(unit)
         base_unit.BaseUnit.active_units.draw(self.screen)
         
-        # If there's a selected unit, highlight it
+        # If there's a selected unit, outline it
         if self.sel_unit:
             pygame.gfxdraw.rectangle(
                 self.screen,
                 self.sel_unit.rect,
                 SELECT_COLOR)
+                
+        # Mark potential targets
+        for tile_pos in self._attackable_tiles:
+            screen_pos = self.map.screen_coords(tile_pos)
+            tile_rect = pygame.Rect(screen_pos, self.map.get_tile_size())
+            
+            # Draw a box around it
+            pygame.gfxdraw.rectangle(
+                self.screen,
+                tile_rect,
+                TARGET_COLOR)
         
         # Draw the status bar
         self.draw_bar()
