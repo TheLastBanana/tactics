@@ -188,11 +188,13 @@ class BaseUnit(Sprite):
         r = self.get_atk_range(from_tile)
         tiles = set()
         
-        for x in range(int(from_x - r), int(from_x + r)):
-            for y in range(int(from_y - r), int(from_y + r)):
+        for x in range(int(from_x - r), int(from_x + r + 1)):
+            for y in range(int(from_y - r), int(from_y + r + 1)):
                 # This is in range
                 if helper.manhattan_dist((from_pos), (x, y)) <= r:
                     tiles.add((x, y))
+                    
+        return tiles
         
     def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
         """
