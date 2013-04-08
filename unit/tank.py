@@ -1,5 +1,5 @@
 from unit.base_unit import BaseUnit
-import unit
+import unit, helper
 from tiles import Tile
 import pygame
 import math
@@ -49,10 +49,8 @@ class Tank(BaseUnit):
         Returns whether the given tile is attackable.
         """
         # We can only attack within the unit's range.
-        dx = to_pos[0] - from_pos[0]
-        dy = to_pos[1] - from_pos[1]
-        r = self.get_atk_range(from_tile)
-        if dx * dx + dy * dy > r * r:
+        dist = helper.manhattan_dist(from_pos, to_pos)
+        if dist > self.get_atk_range(from_tile):
             return False
         
         # Get the unit we're going to attack.
