@@ -250,7 +250,7 @@ class GUI(LayeredUpdates):
         
         # Create the tile map
         self.map = tiles.TileMap("assets/tiles.png", 20, 20, w, h)
-        self.map.tiles = map_tiles
+        self.map.set_tiles(map_tiles)
         self.add(self.map)
         
         # Move up to the unit definitions

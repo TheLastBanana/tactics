@@ -15,55 +15,7 @@ tile_types = {
 }
 
 HIGHLIGHT_RATE = 0.0025
-    
-def better_tile(a, b, start, end):
-    """
-    Picks the best tile to use. This is used in case of a tie in the
-    priority queue. Returns True if choosing tile a, or False for tile b.
-    The tile with the closest slope to the slope between start and end
-    will be given priority. If there's still a tie, the tile with the
-    lowest Y is chosen. Finally, if that fails, the tile with the lowest
-    X is chosen.
-    
-    Examples:
-    The best tile here is (1, 1), as it lies directly on the line:
-    >>> better_tile((1, 1), (1, 2), (0, 0), (3, 3))
-    True
-    
-    The best tile here is (1, 4), as it lies closer to the line:
-    >>> better_tile((1, 1), (1, 4), (0, 3), (3, 3))
-    False
-    
-    Both tiles are equidistant to the line, so we choose the lowest Y,
-    (1, 0):
-    >>> better_tile((0, 1), (1, 0), (0, 0), (3, 3))
-    False
-    
-    Both tiles are equidistant to the line and have equal Y, so we
-    choose the lowest X, (3, 1):
-    >>> better_tile((3, 1), (5, 1), (4, 0), (4, 4))
-    True
-    """
-    dist_a = round(helper.squared_segment_dist(a, start, end), 3)
-    dist_b = round(helper.squared_segment_dist(b, start, end), 3)
-    
-    # Choose the lowest difference from the line
-    if dist_a < dist_b:
-        return True
-    elif dist_a > dist_b:
-        return False
-    else:
-        # Still a tie - choose lowest Y
-        if a[1] < b[1]:
-            return True
-        elif a[1] > b[1]:
-            return False
-        else:
-            # Still a tie - choose lowest X
-            if a[0] < b[0]:
-                return True
-            else:
-                return False
+GRID_COLOR = (0, 0, 0, 80)
 
 class TileMap(Sprite):
     """
@@ -79,18 +31,19 @@ class TileMap(Sprite):
         map_width: the width of map, in tiles
         map_height: the height of the map, in tiles
         """
+        
+        # Set up map info
         self._sprite_sheet = pygame.image.load(sheet_name)
         self._tile_width = tile_width
         self._tile_height = tile_height
         self._map_width = map_width
         self._map_height = map_height
-        self.tiles = []
+        self._tiles = []
         self._highlights = {}
-        self._grid_color = (0, 0, 0, 64)
         
         # Fill the list with empty tiles
         for i in range(self._tile_count()):
-            self.tiles.append(0)
+            self._tiles.append(0)
         
         Sprite.__init__(self)
         
@@ -99,6 +52,7 @@ class TileMap(Sprite):
             (self._tile_width * self._map_width,
             self._tile_height * self._map_height)
         )
+        self._base_image = self.image.copy()
         self.rect = self.image.get_rect()
         
     def _tile_count(self):
@@ -171,6 +125,48 @@ class TileMap(Sprite):
         
         return (r, g, b, a)
         
+    def _render_base_image(self, redraw = []):
+        """
+        Redraws all the tiles onto the base image.
+        """
+        # clear the image
+        self._base_image.fill((0, 0, 0, 0))
+        
+        # draw in each tile
+        for i in range(self._tile_count()):
+            tile_id = tile_types[self._tiles[i]].sprite_id
+            
+            # get its position from its index in the list
+            x, y = self._tile_position(i)
+            x *= self._tile_width
+            y *= self._tile_height
+            
+            # determine which subsection to draw based on the sprite id
+            area = pygame.Rect(
+                tile_id * self._tile_width,
+                0,
+                self._tile_width,
+                self._tile_height
+            )
+            
+            # draw the tile
+            self._base_image.blit(self._sprite_sheet, (x, y), area)
+            
+    def set_tiles(self, tiles):
+        """
+        Sets the list of tiles.
+        """
+        self._tiles = tiles[:]
+        
+        # The image now needs to be redrawn
+        self._render_base_image()
+            
+    def get_tiles(self):
+        """
+        Returns the list of tiles.
+        """
+        return self._tiles[:]
+        
     def get_tile_size(self):
         """
         Returns a tuple containing a tile's width and height within this map.
@@ -227,7 +223,7 @@ class TileMap(Sprite):
         
         index = self._tile_index(coords)
         
-        return tile_types[self.tiles[index]]
+        return tile_types[self._tiles[index]]
         
     def tile_neighbours(self, coords):
         """
@@ -285,29 +281,9 @@ class TileMap(Sprite):
         Overrides the default update function for sprites. This updates
         the image.
         """
-        # clear the image
-        self.image.fill((0, 0, 0, 0))
+        # copy over the base image
+        self.image = self._base_image.copy()
         
-        # draw in each tile
-        for i in range(self._tile_count()):
-            tile_id = tile_types[self.tiles[i]].sprite_id
-            
-            # get its position from its index in the list
-            x, y = self._tile_position(i)
-            x *= self._tile_width
-            y *= self._tile_height
-            
-            # determine which subsection to draw based on the sprite id
-            area = pygame.Rect(
-                tile_id * self._tile_width,
-                0,
-                self._tile_width,
-                self._tile_height
-            )
-            
-            # draw the tile
-            self.image.blit(self._sprite_sheet, (x, y), area)
-            
         # draw the highlights
         for name, (tiles, colorA, colorB) in self._highlights.items():
             for coord in tiles:
@@ -330,7 +306,7 @@ class TileMap(Sprite):
                 x,
                 0,
                 self._map_height * self._tile_height,
-                self._grid_color
+                GRID_COLOR
             )
         for y in range(0,
                         self._map_height * self._tile_height,
@@ -340,8 +316,57 @@ class TileMap(Sprite):
                 0,
                 self._map_width * self._tile_width,
                 y,
-                self._grid_color
+                GRID_COLOR
             )
+    
+def better_tile(a, b, start, end):
+    """
+    Picks the best tile to use. This is used in case of a tie in the
+    priority queue. Returns True if choosing tile a, or False for tile b.
+    The tile with the closest slope to the slope between start and end
+    will be given priority. If there's still a tie, the tile with the
+    lowest Y is chosen. Finally, if that fails, the tile with the lowest
+    X is chosen.
+    
+    Examples:
+    The best tile here is (1, 1), as it lies directly on the line:
+    >>> better_tile((1, 1), (1, 2), (0, 0), (3, 3))
+    True
+    
+    The best tile here is (1, 4), as it lies closer to the line:
+    >>> better_tile((1, 1), (1, 4), (0, 3), (3, 3))
+    False
+    
+    Both tiles are equidistant to the line, so we choose the lowest Y,
+    (1, 0):
+    >>> better_tile((0, 1), (1, 0), (0, 0), (3, 3))
+    False
+    
+    Both tiles are equidistant to the line and have equal Y, so we
+    choose the lowest X, (3, 1):
+    >>> better_tile((3, 1), (5, 1), (4, 0), (4, 4))
+    True
+    """
+    dist_a = round(helper.squared_segment_dist(a, start, end), 3)
+    dist_b = round(helper.squared_segment_dist(b, start, end), 3)
+    
+    # Choose the lowest difference from the line
+    if dist_a < dist_b:
+        return True
+    elif dist_a > dist_b:
+        return False
+    else:
+        # Still a tie - choose lowest Y
+        if a[1] < b[1]:
+            return True
+        elif a[1] > b[1]:
+            return False
+        else:
+            # Still a tie - choose lowest X
+            if a[0] < b[0]:
+                return True
+            else:
+                return False
             
 def find_path(tilemap,
                 start,
