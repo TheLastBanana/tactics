@@ -1,6 +1,4 @@
-import pygame
-import unit
-import helper
+import pygame, unit, helper, bmpfont
 from pygame.sprite import Sprite
 
 FRAME_MOVE_SPEED = 3/20
@@ -13,6 +11,8 @@ class BaseUnit(Sprite):
     """
     
     active_units = pygame.sprite.Group()
+    
+    health_font = bmpfont.BitmapFont("assets/healthfont.png", 6, 7, 48)
     
     def __init__(self,
                  team = -1,
@@ -37,16 +37,16 @@ class BaseUnit(Sprite):
         self._path = []
         self.turn_state = [False, False]
         
-        #set required pygame things.
-        self.image = None
-        self.rect = pygame.Rect(0, 0, SIZE, SIZE)
-        self._update_image()
-        
         #Default unit stats
         self.health = 10
         self.max_health = self.health
         self.speed = 5
         self.atk_range = 1
+        
+        #set required pygame things.
+        self.image = None
+        self.rect = pygame.Rect(0, 0, SIZE, SIZE)
+        self._update_image()
         
         if activate:
             self.activate()
@@ -78,7 +78,21 @@ class BaseUnit(Sprite):
             raise Exception(
                 "Class {} does not have a sprite for team {}!".format(
                     self.__class__.__name__, self.team))
+    
+        # Rotate the sprite
         self.image = pygame.transform.rotate(subsurf, self._angle)
+
+        # Render the health.
+        health_surf = BaseUnit.health_font.render(str(self.health))
+        
+        # Move the health to the bottom-right of the image.
+        image_rect = self.image.get_rect()
+        health_rect = health_surf.get_rect()
+        health_rect.move_ip(image_rect.w - health_rect.w,
+                            image_rect.h - health_rect.h)
+                            
+        # Draw the health on to the image.
+        self.image.blit(health_surf, health_rect)
         
     def activate(self):
         """
