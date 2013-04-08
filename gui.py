@@ -62,7 +62,8 @@ class GUI(LayeredUpdates):
         # Determine where we can move.
         pos = self.map.tile_coords(
             (self.sel_unit.rect.x, self.sel_unit.rect.y))
-        self._movable_tiles = self.map.reachable_tiles(
+        self._movable_tiles = tiles.reachable_tiles(
+            self.map,
             pos,
             self.sel_unit.speed,
             self.sel_unit.move_cost,
@@ -287,7 +288,8 @@ class GUI(LayeredUpdates):
                         
                         #set the path in the unit.
                         self.sel_unit.set_path(
-                            self.map.find_path(
+                            tiles.find_path(
+                                self.map,
                                 from_tile_pos,
                                 to_tile_pos,
                                 self.sel_unit.move_cost,

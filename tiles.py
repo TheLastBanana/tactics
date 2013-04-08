@@ -140,27 +140,33 @@ class TileMap(Sprite):
         
     Example use:
     >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
-    >>> t.load_from_file("maps/emptysm.map")
+    >>> t.tiles = [0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0,\
+                   0, 0, 0, 0, 0]
     
     >>> t.tile_coords((45, 22))
     (2, 1)
     >>> t.screen_coords((3, 4))
     (60, 80)
     
-    >>> t.is_passable((3, 2))
-    True
-    >>> t.is_passable((8, 8))
-    False
-    
-    >>> t.find_path((0, 0), (4, 4))
+    >>> find_path(t, (0, 0), (4, 4))
     [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
-    >>> t.find_path((0, 0), (5, 5))
+    >>> find_path(t, (0, 0), (5, 5))
     []
     
     >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
-    >>> t.load_from_file("maps/testsm.map")
-    >>> t.find_path((2, 0), (4, 1))
-    [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), (3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
+    >>> t.tiles = [0, 0, 0, 0, 1, 0,\
+                   0, 1, 1, 1, 0, 0,\
+                   0, 0, 0, 0, 1, 0,\
+                   0, 1, 1, 0, 1, 0,\
+                   0, 0, 1, 0, 0, 0,\
+                   1, 0, 0, 0, 1, 0]
+   
+    >>> find_path(t, (2, 0), (4, 1))
+    [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), \
+(3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
     """
     
     def __init__(self, sheet_name, tile_width, tile_height,
@@ -260,6 +266,24 @@ class TileMap(Sprite):
         
         return tile_types[self.tiles[index]]
         
+    def tile_neighbours(self, coords):
+        """
+        Returns all neighbour coordinates to a given tile. Does not return
+        coordinates which do not exist.
+        """
+        x, y = coords
+        
+        # The possible neighbouring tiles.
+        neighbours = [
+            (x, y - 1),
+            (x + 1, y),
+            (x - 1, y),
+            (x, y + 1)
+        ]
+        
+        # Return only those which exist.
+        return [n for n in neighbours if self._tile_exists(n)]
+        
     def set_highlight(self, name, colorA, colorB, tiles):
         """
         Sets the given list of tile coordinates to be highlighted in the given
@@ -355,136 +379,122 @@ class TileMap(Sprite):
                 y,
                 self._grid_color
             )
-
-    def find_path(self,
-                  start,
-                  end,
-                  cost = lambda x: 1,
-                  passable = lambda x: False):
-        """
-        Returns the path between two points as a list of tile coordinates using
-        the A* algorithm.
-        If no path could be found, an empty list is returned.
-        
-        Code based on algorithm described in:
-        http://www.policyalmanac.org/games/aStarTutorial.htm
-        """
-        # tiles to check (tuples of x, y)
-        todo = pqueue.PQueue()
-        todo.update(start, 0)
-        
-        # tiles we've been to
-        visited = set()
-        
-        # associated G and H costs for each tile (tuples of G, H)
-        costs = { start: (0, manhattan_dist(start, end)) }
-        
-        # parents for each tile
-        parents = {}
-        
-        while todo and (end not in visited):
-            todo.tie_breaker = lambda a,b: better_tile(a, b, start, end)
-        
-            cur, c = todo.pop_smallest()
-            cur_data = self.tile_data(cur)
-            x, y = cur
-            visited.add(cur)
             
-            # check neighbours
-            neighbours = [
-                (x, y - 1),
-                (x + 1, y),
-                (x - 1, y),
-                (x, y + 1)
-            ]
-            for n in neighbours:
-                # skip it if it doesn't exist, if we've already checked it, or
-                # if it isn't passable
-                if ((not self._tile_exists(n)) or(n in visited) or
-                    (not passable(self.tile_data(n), n))):
-                    continue
-                
-                if n not in todo:
-                    # we haven't looked at this tile yet, so calculate its costs
-                    g = costs[cur][0] + cost(cur_data)
-                    h = manhattan_dist(n, end)
-                    costs[n] = (g, h)
-                    parents[n] = cur
-                    todo.update(n, g + h)
-                else:
-                    # if we've found a better path, update it
-                    g, h = costs[n]
-                    new_g = costs[cur][0] + cost(cur_data)
-                    if new_g < g:
-                        g = new_g
-                        todo.update(n, g + h)
-                        costs[n] = (g, h)
-                        parents[n] = cur
+def find_path(tilemap,
+                start,
+                end,
+                cost = lambda x: 1,
+                      passable = lambda x, y: x.passable):
+    """
+    Returns the path between two points as a list of tile coordinates using
+    the A* algorithm.
+    If no path could be found, an empty list is returned.
+    
+    Code based on algorithm described in:
+    http://www.policyalmanac.org/games/aStarTutorial.htm
+    """
+    # tiles to check (tuples of (x, y), cost)
+    todo = pqueue.PQueue()
+    todo.update(start, 0)
+    
+    # tiles we've been to
+    visited = set()
+    
+    # associated G and H costs for each tile (tuples of G, H)
+    costs = { start: (0, manhattan_dist(start, end)) }
+    
+    # parents for each tile
+    parents = {}
+    
+    while todo and (end not in visited):
+        todo.tie_breaker = lambda a,b: better_tile(a, b, start, end)
+    
+        cur, c = todo.pop_smallest()
+        cur_data = tilemap.tile_data(cur)
+        visited.add(cur)
         
-        # we didn't find a path
-        if end not in visited:
-            return []
-        
-        # build the path backward
-        path = []
-        while end != start:
-            path.append(end)
-            end = parents[end]
-        path.append(start)
-        path.reverse()
-        
-        return path
-        
-    def reachable_tiles(self,
-                        start,
-                        max_cost,
-                        cost = lambda x: 1,
-                        passable = lambda x: False):
-        """
-        Returns a set of tiles which can be reached with a total cost of
-        max_cost.
-        """
-        # tiles to check (tuples of x, y)
-        todo = pqueue.PQueue()
-        todo.update(start, 0)
-        
-        # tiles we've been to
-        visited = set()
-        
-        # tiles which we can get to within max_cost
-        reachable = set()
-        reachable.add(start)
-        
-        while todo:
-            cur, c = todo.pop_smallest()
-            cur_data = self.tile_data(cur)
-            x, y = cur
-            visited.add(cur)
-            
-            # it's too expensive to get here, so don't bother checking
-            if c > max_cost:
+        # check neighbours
+        for n in tilemap.tile_neighbours(cur):
+            # skip it if it doesn't exist, if we've already checked it, or
+            # if it isn't passable
+            if ((n in visited) or
+                (not passable(tilemap.tile_data(n), n))):
                 continue
             
-            # check neighbours
-            neighbours = [
-                (x, y - 1),
-                (x + 1, y),
-                (x - 1, y),
-                (x, y + 1)
-            ]
-            for n in neighbours:
-                # skip it if it doesn't exist, if we've already checked it, or
-                # if it isn't passable
-                if ((not self._tile_exists(n)) or(n in visited) or
-                    (not passable(self.tile_data(n), n))):
-                    continue
-                
-                # try updating the tile's cost
-                new_cost = c + cost(cur_data)
-                if todo.update(n, new_cost) and new_cost <= max_cost:
-                    reachable.add(n)
+            if n not in todo:
+                # we haven't looked at this tile yet, so calculate its costs
+                g = costs[cur][0] + cost(cur_data)
+                h = manhattan_dist(n, end)
+                costs[n] = (g, h)
+                parents[n] = cur
+                todo.update(n, g + h)
+            else:
+                # if we've found a better path, update it
+                g, h = costs[n]
+                new_g = costs[cur][0] + cost(cur_data)
+                if new_g < g:
+                    g = new_g
+                    todo.update(n, g + h)
+                    costs[n] = (g, h)
+                    parents[n] = cur
+    
+    # we didn't find a path
+    if end not in visited:
+        return []
+    
+    # build the path backward
+    path = []
+    while end != start:
+        path.append(end)
+        end = parents[end]
+    path.append(start)
+    path.reverse()
+    
+    return path
+    
+def reachable_tiles(tilemap,
+                      start,
+                      max_cost,
+                      cost = lambda x: 1,
+                      passable = lambda x, y: x.passable):
+    """
+    Returns a set of tiles which can be reached with a total cost of
+    max_cost.
+    """
+    # tiles to check (tuples of x, y)
+    todo = pqueue.PQueue()
+    todo.update(start, 0)
+    
+    # tiles we've been to
+    visited = set()
+    
+    # tiles which we can get to within max_cost
+    reachable = set()
+    reachable.add(start)
+    
+    while todo:
+        cur, c = todo.pop_smallest()
+        cur_data = tilemap.tile_data(cur)
+        visited.add(cur)
         
-        return reachable
+        # it's too expensive to get here, so don't bother checking
+        if c > max_cost:
+            continue
+        
+        # check neighbours
+        for n in tilemap.tile_neighbours(cur):
+            # skip it if it doesn't exist, if we've already checked it, or
+            # if it isn't passable
+            if ((n in visited) or
+                (not passable(tilemap.tile_data(n), n))):
+                continue
+            
+            # try updating the tile's cost
+            new_cost = c + cost(cur_data)
+            if todo.update(n, new_cost) and new_cost <= max_cost:
+                reachable.add(n)
+    
+    return reachable
         
 if __name__ == "__main__":
     import doctest
