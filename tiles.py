@@ -312,7 +312,9 @@ class TileMap(Sprite):
                                    self._get_highlight_color(colorA, colorB))
             
         # draw the grid
-        for x in range(0, self._map_width * self._tile_width, self._tile_width):
+        for x in range(0,
+                        self._map_width * self._tile_width,
+                        self._tile_width):
             pygame.gfxdraw.vline(
                 self.image,
                 x,
@@ -320,7 +322,9 @@ class TileMap(Sprite):
                 self._map_height * self._tile_height,
                 self._grid_color
             )
-        for y in range(0, self._map_height * self._tile_height, self._tile_height):
+        for y in range(0,
+                        self._map_height * self._tile_height,
+                        self._tile_height):
             pygame.gfxdraw.hline(
                 self.image,
                 0,
