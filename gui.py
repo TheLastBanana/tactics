@@ -3,6 +3,7 @@ from pygame.sprite import LayeredUpdates
 from collections import namedtuple
 import tiles, unit, animation
 from unit import *
+from effects.explosion import Explosion
 
 MAP_WIDTH = 600
 BAR_WIDTH = 200
@@ -197,6 +198,9 @@ class GUI(LayeredUpdates):
                                              20,
                                              RETICLE_RATE)
         
+        # This will store effects which are drawn over everything else
+        self._effects = pygame.sprite.Group()
+        
     def get_cur_team(self):
         """
         Gets the current team based on the turn.
@@ -309,6 +313,9 @@ class GUI(LayeredUpdates):
             
             # If this is in the map, we're dealing with units or tiles
             if self.map.rect.collidepoint(e.pos):
+                # Get the tile's position
+                to_tile_pos = self.map.tile_coords(e.pos)
+
                 # get the unit at the mouseclick
                 unit = self.unit_at_screen_pos(e.pos)
                 
@@ -323,32 +330,19 @@ class GUI(LayeredUpdates):
                     elif (self.mode == Modes.Select and
                           unit.team == self.get_cur_team()):
                         self.sel_unit = unit
+                    elif (self.mode == Modes.ChooseAttack and
+                        self.sel_unit and
+                        to_tile_pos in self._attackable_tiles):
+                        # Attack the selected tile
+                        self.sel_unit_attack(to_tile_pos)
                 else:
                     # No unit there, so a tile was clicked
-                    to_tile_pos = self.map.tile_coords(e.pos)
-                    
-                    # Move to the selected tile
                     if (self.mode == Modes.ChooseMove and
                         self.sel_unit and
                         to_tile_pos in self._movable_tiles):
                         
-                        #Change the game state to show that there
-                        # was a movement.
-                        self.change_mode(Modes.Moving)
-                        self.sel_unit.turn_state[0] = True
-                        
-                        #the tile position the unit is at
-                        from_tile_pos = (self.sel_unit.tile_x,
-                                         self.sel_unit.tile_y)
-                        
-                        #set the path in the unit.
-                        self.sel_unit.set_path(
-                            tiles.find_path(
-                                self.map,
-                                from_tile_pos,
-                                to_tile_pos,
-                                self.sel_unit.move_cost,
-                                self.sel_unit.is_passable))
+                        # Move to the selected tile
+                        self.sel_unit_move(to_tile_pos)
             
             # Otherwise, the user is interacting with the GUI panel
             else:
@@ -356,6 +350,52 @@ class GUI(LayeredUpdates):
                 for button in self.buttons:
                     if self.get_button_rect(button).collidepoint(e.pos):
                         button.onClick()
+                        
+    def sel_unit_attack(self, pos):
+        """
+        Attack the given position using the selected unit.
+        """
+        # Change the game state to show that there was an attack.
+        self.change_mode(Modes.Select)
+        
+        # Mark that the unit has attacked.
+        self.sel_unit.turn_state[1] = True
+        
+        # Get info about the attackee
+        atk_unit = self.unit_at_pos(pos)
+        atk_tile = self.map.tile_data(pos)
+        
+        # Calculate the damage
+        damage = self.sel_unit.get_damage(atk_unit) - atk_tile.defense
+        
+        # Deal damage
+        atk_unit.hurt(damage)
+        
+        # Explode
+        self._effects.add(Explosion(self.map.screen_coords(pos)))
+                    
+    def sel_unit_move(self, pos):
+        """
+        Move the selected unit to the given position.
+        """
+        # Change the game state to show that there was a movement.
+        self.change_mode(Modes.Moving)
+        
+        # Mark that the unit has moved
+        self.sel_unit.turn_state[0] = True
+        
+        #the tile position the unit is at
+        from_tile_pos = (self.sel_unit.tile_x,
+                         self.sel_unit.tile_y)
+        
+        #set the path in the unit.
+        self.sel_unit.set_path(
+            tiles.find_path(
+                self.map,
+                from_tile_pos,
+                pos,
+                self.sel_unit.move_cost,
+                self.sel_unit.is_passable))
                         
     def unit_at_pos(self, pos):
         """
@@ -396,6 +436,8 @@ class GUI(LayeredUpdates):
         Update everything in the group.
         """
         LayeredUpdates.update(self)
+        
+        # Update units
         base_unit.BaseUnit.active_units.update()
         
         # The unit is finished moving, so go back to select
@@ -405,6 +447,9 @@ class GUI(LayeredUpdates):
                 
         # Update the reticle effect
         self._reticle.update()
+        
+        # Update effects
+        self._effects.update()
 
     def draw(self):
         """
@@ -432,6 +477,9 @@ class GUI(LayeredUpdates):
         for tile_pos in self._attackable_tiles:
             screen_pos = self.map.screen_coords(tile_pos)
             self.draw_reticle(screen_pos)
+            
+        # Draw effects
+        self._effects.draw(self.screen)
         
         # Draw the status bar
         self.draw_bar()

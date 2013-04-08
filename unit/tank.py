@@ -17,6 +17,7 @@ class Tank(BaseUnit):
         #set unit specific things.
         self.speed = 10
         self.atk_range = 3
+        self.damage = 4
         
     def move_cost(self, tile):
         """

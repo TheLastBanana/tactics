@@ -5,13 +5,13 @@ from pygame.sprite import Sprite
 from collections import namedtuple
 
 # A container class which stores information about a tile.
-Tile = namedtuple('Tile', ['type', 'sprite_id', 'passable'])
+Tile = namedtuple('Tile', ['type', 'sprite_id', 'passable', 'defense'])
 
 # a dictionary of tile IDs associated with their type data
 tile_types = {
-    0:  Tile('plains', 0, True),
-    1:  Tile('wall', 1, False),
-    2:  Tile('water', 2, False)
+    0:  Tile('plains', 0, True, 0),
+    1:  Tile('wall', 1, False, 0),
+    2:  Tile('water', 2, False, 0)
 }
 
 HIGHLIGHT_RATE = 0.0025

@@ -42,6 +42,7 @@ class BaseUnit(Sprite):
         self.max_health = self.health
         self.speed = 5
         self.atk_range = 1
+        self.damage = 1
         
         #set required pygame things.
         self.image = None
@@ -106,7 +107,7 @@ class BaseUnit(Sprite):
         """
         Removes this unit from the active roster.
         """
-        if self.active:
+        if self._active:
             self._active = False
             BaseUnit.active_units.remove(self)
 
@@ -173,6 +174,28 @@ class BaseUnit(Sprite):
         #set the path
         self._path = path
         
+    def set_angle(self, angle):
+        """
+        Sets the sprite's new angle, rotating the graphic at the same
+        time. Does nothing if the sprite is already at that angle.
+        """
+        if self._angle == angle: return
+        self._angle = angle
+        self._update_image()
+        
+    def hurt(self, damage):
+        """
+        Causes damage to the unit, and destroys it when it's out of health.
+        """
+        self.health -= damage
+        
+        # Dead!
+        if self.health <= 0:
+            self.deactivate()
+        
+        # Update the health graphic.
+        self._update_image()
+        
     def move_cost(self, tile):
         """
         Returns the cost of a unit moving over a certain tile.
@@ -223,15 +246,6 @@ class BaseUnit(Sprite):
         Returns whether or not a unit is currently in transit.
         """
         return self._moving
-        
-    def set_angle(self, angle):
-        """
-        Sets the sprite's new angle, rotating the graphic at the same
-        time. Does nothing if the sprite is already at that angle.
-        """
-        if self._angle == angle: return
-        self._angle = angle
-        self._update_image()
 
     def get_speed_str(self):
         """
@@ -244,6 +258,12 @@ class BaseUnit(Sprite):
         Returns the unit's health as a string.
         """
         return str(self.health)
+        
+    def get_damage(self, target):
+        """
+        Returns the potential attack damage against a given enemy.
+        """
+        return self.damage
         
     def get_atk_range(self, tile = None):
         """

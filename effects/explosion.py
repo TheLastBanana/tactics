@@ -4,7 +4,7 @@ class Explosion(animation.Animation):
     """
     An animated explosion effect.
     """
-    def __init__(self):
+    def __init__(self, pos):
         """
         Initialize the sprite effect.
         """
@@ -14,3 +14,4 @@ class Explosion(animation.Animation):
                                      20,
                                      0.2,
                                      animation.Mode.OneShot)
+        self.rect.topleft = pos
