@@ -1,7 +1,7 @@
 import sys, pygame
 from pygame.sprite import LayeredUpdates
 from collections import namedtuple
-import tiles, unit
+import tiles, unit, animation
 from unit import *
 
 MAP_WIDTH = 600
@@ -13,9 +13,11 @@ CENTER = 100
 # padding for left and top side of the bar
 PAD = 6
 
+# Speed of reticle blinking
+RETICLE_RATE = 0.02
+
 # RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
-TARGET_COLOR = (255, 255, 255, 150)
 MOVE_COLOR_A = (0, 0, 210, 80)
 MOVE_COLOR_B = (75, 125, 255, 120)
 ATK_COLOR_A = (255, 0, 0, 140)
@@ -45,6 +47,12 @@ class Modes:
 Button = namedtuple('Button', ['slot', 'text', 'onClick'])
 
 class GUI(LayeredUpdates):
+    """
+    This class handles user input, and is also responsible for rendering objects
+    on-screen (including converting unit tile positions into on-screen
+    positions). Essentially, it is the middleman between objects and the actual
+    tilemap.
+    """
     # number of GUI instances
     num_instances = 0
             
@@ -182,6 +190,12 @@ class GUI(LayeredUpdates):
         # Tiles we can move to/attack
         self._movable_tiles = set()
         self._attackable_tiles = set()
+
+        # The targeting reticle
+        self._reticle = animation.Animation("assets/reticle.png",
+                                             20,
+                                             20,
+                                             RETICLE_RATE)
         
     def get_cur_team(self):
         """
@@ -384,9 +398,13 @@ class GUI(LayeredUpdates):
         LayeredUpdates.update(self)
         base_unit.BaseUnit.active_units.update()
         
+        # The unit is finished moving, so go back to select
         if self.mode == Modes.Moving:
             if (not self.sel_unit) or (not self.sel_unit.is_moving()):
                 self.change_mode(Modes.Select)
+                
+        # Update the reticle effect
+        self._reticle.update()
 
     def draw(self):
         """
@@ -413,19 +431,19 @@ class GUI(LayeredUpdates):
         # Mark potential targets
         for tile_pos in self._attackable_tiles:
             screen_pos = self.map.screen_coords(tile_pos)
-            tile_rect = pygame.Rect(screen_pos, self.map.get_tile_size())
-            
-            # Draw a box around it
-            pygame.gfxdraw.rectangle(
-                self.screen,
-                tile_rect,
-                TARGET_COLOR)
+            self.draw_reticle(screen_pos)
         
         # Draw the status bar
         self.draw_bar()
 
         # Update the screen
         pygame.display.flip()
+        
+    def draw_reticle(self, pos):
+        """
+        Draws a reticle with its top-left corner at pos.
+        """
+        self.screen.blit(self._reticle.image, pos)
 
     def draw_bar(self):
         """
