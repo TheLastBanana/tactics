@@ -398,7 +398,7 @@ def find_path(tilemap,
             if n not in todo:
                 # we haven't looked at this tile yet, so calculate its costs
                 g = costs[cur][0] + cost(cur_data)
-                h = manhattan_dist(n, end)
+                h = helper.manhattan_dist(n, end)
                 costs[n] = (g, h)
                 parents[n] = cur
                 todo.update(n, g + h)
