@@ -42,6 +42,12 @@ class BaseUnit(Sprite):
         self.rect = pygame.Rect(0, 0, SIZE, SIZE)
         self._update_image()
         
+        #Default unit stats
+        self.health = 10
+        self.max_health = self.health
+        self.speed = 5
+        self.atk_range = 1
+        
         if activate:
             self.activate()
             
@@ -174,6 +180,14 @@ class BaseUnit(Sprite):
         
         return tile.passable
         
+    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+        """
+        Returns whether the given tile is attackable.
+        
+        Override this for subclasses.
+        """
+        return False
+        
     def is_moving(self):
         """
         Returns whether or not a unit is currently in transit.
@@ -200,6 +214,14 @@ class BaseUnit(Sprite):
         Returns the unit's health as a string.
         """
         return str(self.health)
+        
+    def get_atk_range(self, tile = None):
+        """
+        Returns the unit's maximum attack range, assuming that it is attacking
+        from the given tile. If no tile is provided, this just returns the
+        unit's range.
+        """
+        return self.atk_range
 
     def get_direction(self):
         """

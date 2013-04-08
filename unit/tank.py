@@ -2,6 +2,7 @@ from unit.base_unit import BaseUnit
 import unit
 from tiles import Tile
 import pygame
+import math
 
 class Tank(BaseUnit):
     def __init__(self, **keywords):
@@ -12,9 +13,8 @@ class Tank(BaseUnit):
         BaseUnit.__init__(self, **keywords)
 
         #set unit specific things.
-        self.health = 10
-        self.max_health = self.health
         self.speed = 10
+        self.atk_range = 2
         
     def move_cost(self, tile):
         """
@@ -43,5 +43,25 @@ class Tank(BaseUnit):
         
         # Return default
         return BaseUnit.is_passable(self, tile, pos)
+        
+    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+        """
+        Returns whether the given tile is attackable.
+        """
+        # We can only attack within the unit's range.
+        dx = to_pos[0] - from_pos[0]
+        dy = to_pos[1] - from_pos[1]
+        r = self.get_atk_range(from_tile)
+        if dx * dx + dy * dy > r * r:
+            return False
+        
+        # Get the unit we're going to attack.
+        u = BaseUnit.get_unit_at_pos(to_pos)
+        
+        # We can't attack if there's no unit there, or if it's on our team.
+        if not u or u.team == self.team:
+            return False
+            
+        return True
 
 unit.unit_types["Tank"] = Tank
