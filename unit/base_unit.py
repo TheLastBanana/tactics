@@ -43,6 +43,7 @@ class BaseUnit(Sprite):
         self.speed = 5
         self.atk_range = 1
         self.damage = 1
+        self.type = "Base Unit"
         
         #set required pygame things.
         self.image = None
@@ -262,18 +263,6 @@ class BaseUnit(Sprite):
         Returns whether or not a unit is currently in transit.
         """
         return self._moving
-
-    def get_speed_str(self):
-        """
-        Returns the unit's speed as a string.
-        """
-        return str(self.speed)
-
-    def get_health_str(self):
-        """
-        Returns the unit's health as a string.
-        """
-        return str(self.health)
         
     def get_damage(self, target, target_tile):
         """

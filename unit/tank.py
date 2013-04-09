@@ -15,6 +15,7 @@ class Tank(BaseUnit):
         BaseUnit.__init__(self, **keywords)
 
         #set unit specific things.
+        self.type = "Tank"
         self.speed = 10
         self.atk_range = 2
         self.damage = 4
