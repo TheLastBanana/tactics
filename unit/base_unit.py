@@ -84,7 +84,7 @@ class BaseUnit(Sprite):
         self.image = pygame.transform.rotate(subsurf, self._angle)
 
         # Render the health.
-        health_surf = BaseUnit.health_font.render(str(self.health))
+        health_surf = BaseUnit.health_font.render(str(int(self.health)))
         
         # Move the health to the bottom-right of the image.
         image_rect = self.image.get_rect()
