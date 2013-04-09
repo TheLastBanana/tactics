@@ -364,6 +364,11 @@ class GUI(LayeredUpdates):
         # Mark that the unit has attacked.
         self.sel_unit.turn_state[1] = True
         
+        # Face the attackee
+        self.sel_unit.face_vector((
+            pos[0] - self.sel_unit.tile_x,
+            pos[1] - self.sel_unit.tile_y))
+        
         # Get info about the attackee
         atk_unit = self.unit_at_pos(pos)
         atk_tile = self.map.tile_data(pos)
