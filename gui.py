@@ -7,9 +7,16 @@ from effects.explosion import Explosion
 
 MAP_WIDTH = 600
 BAR_WIDTH = 200
-FONT_SIZE = 16
 BUTTON_HEIGHT = 50
 CENTER = 100
+
+# Set the fonts
+pygame.font.init()
+FONT_SIZE = 16
+BIG_FONT_SIZE = 42
+FONT = pygame.font.SysFont("Arial", FONT_SIZE)
+BIG_FONT = pygame.font.SysFont("Arial", BIG_FONT_SIZE)
+BIG_FONT.set_bold(True)
 
 # padding for left and top side of the bar
 PAD = 6
@@ -40,7 +47,7 @@ TEAM_NAME = {
 # http://stackoverflow.com/questions/702834/whats-the-common-practice-for-enums-
 # in-python
 class Modes:
-    Select, ChooseMove, Moving, ChooseAttack = range(4)
+    Select, ChooseMove, Moving, ChooseAttack, GameOver = range(5)
 
 # A container class which stores button information.
 # Each "slot" is a BUTTON_HEIGHT pixel space counting up from the bottom
@@ -175,6 +182,7 @@ class GUI(LayeredUpdates):
         # Set up team information
         self.num_teams = None
         self.current_turn = 0
+        self.win_team = None 
 
         # The currently selected unit
         self.sel_unit = None
@@ -184,9 +192,6 @@ class GUI(LayeredUpdates):
             Button(0, "MOVE", self.move_pressed),
             Button(1, "ATTACK", self.attack_pressed),
             Button(2, "END TURN", self.end_turn_pressed)]
-
-        # Not line height, actually font size, but conveniently the same thing
-        self.font = pygame.font.SysFont("Arial", FONT_SIZE)
         
         # We start in select mode
         self.mode = Modes.Select
@@ -306,8 +311,10 @@ class GUI(LayeredUpdates):
         This is called when a click event occurs.
         e is the click event.
         """
-        # Don't react when in move mode.
-        if self.mode == Modes.Moving: return
+        # Don't react when in move, attack or game over mode.
+        if (self.mode == Modes.Moving or
+            self.mode == Modes.GameOver):
+            return
         
         # make sure we have focus and that it was the left mouse button
         if (e.type == pygame.MOUSEBUTTONUP
@@ -381,7 +388,17 @@ class GUI(LayeredUpdates):
         
         # Explode
         self._effects.add(Explosion(self.map.screen_coords(pos)))
-                    
+        
+        # If the unit was destroyed, check if there are any others left on a
+        # team other than the selected unit
+        for u in unit.base_unit.BaseUnit.active_units:
+            if u.team != self.sel_unit.team:
+                return
+                
+        # No other units, so game over!
+        self.win_team = self.sel_unit.team
+        self.mode = Modes.GameOver
+    
     def sel_unit_move(self, pos):
         """
         Move the selected unit to the given position.
@@ -491,6 +508,25 @@ class GUI(LayeredUpdates):
         
         # Draw the status bar
         self.draw_bar()
+        
+        # Draw the win message
+        if self.mode == Modes.GameOver:
+            # Determine the message
+            win_text = "TEAM {} WINS!".format(
+                TEAM_NAME[self.win_team].upper())
+            
+            # Render the text
+            win_msg = BIG_FONT.render(
+                win_text,
+                True,
+                FONT_COLOR)
+                
+            # Move it into position
+            msg_rect = pygame.Rect((0, 0), win_msg.get_size())
+            msg_rect.center = (MAP_WIDTH / 2, self.screen.get_height() / 2)
+            
+            # Draw it
+            self.screen.blit(win_msg, msg_rect)
 
         # Update the screen
         pygame.display.flip()
@@ -586,7 +622,7 @@ class GUI(LayeredUpdates):
         """
         Draws text with a specified variable at a specifed line number.
         """
-        line_text = self.font.render(text, True, FONT_COLOR)
+        line_text = FONT.render(text, True, FONT_COLOR)
         self.screen.blit(
             line_text,
             (MAP_WIDTH + PAD, FONT_SIZE * line_num + PAD))
@@ -595,7 +631,7 @@ class GUI(LayeredUpdates):
         """
         Draws a title at a specified line number with the specified text.
         """
-        title_text = self.font.render(text, True, FONT_COLOR)
+        title_text = FONT.render(text, True, FONT_COLOR)
         self.screen.blit(
             title_text,
             (MAP_WIDTH + CENTER - (title_text.get_width()/2),
@@ -644,7 +680,7 @@ class GUI(LayeredUpdates):
         pygame.draw.rect(self.screen, OUTLINE_COLOR, but_out_rect, 2)
 
         # Draw the text
-        but_text = self.font.render(button.text, True, FONT_COLOR)
+        but_text = FONT.render(button.text, True, FONT_COLOR)
         self.screen.blit(
             but_text,
             (MAP_WIDTH + CENTER - (but_text.get_width()/2),
