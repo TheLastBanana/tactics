@@ -382,7 +382,7 @@ class GUI(LayeredUpdates):
         atk_tile = self.map.tile_data(pos)
         
         # Calculate the damage
-        damage = self.sel_unit.get_damage(atk_unit) - atk_tile.defense
+        damage = self.sel_unit.get_damage(atk_unit, atk_tile)
         
         # Deal damage
         atk_unit.hurt(damage)

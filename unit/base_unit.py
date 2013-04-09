@@ -275,11 +275,11 @@ class BaseUnit(Sprite):
         """
         return str(self.health)
         
-    def get_damage(self, target):
+    def get_damage(self, target, target_tile):
         """
         Returns the potential attack damage against a given enemy.
         """
-        return self.damage
+        return self.damage - target_tile.defense
         
     def get_atk_range(self, tile = None):
         """
