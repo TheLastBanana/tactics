@@ -609,15 +609,24 @@ class GUI(LayeredUpdates):
             #Tile coordinates
             self.draw_bar_text("Coordinates: {}".format(coords), line_num)
             line_num += 1
+            
+            #Tile defense
+            defense = tile.defense
+            self.draw_bar_text("Defense: +{}".format(defense), line_num)
+            line_num += 1
 
-            #Is the tile passable?
             #We can only know if there's a unit currently selected
             if self.sel_unit:
-                self.draw_bar_text(
-                    "Passable: {}".format(self.sel_unit.is_passable(
-                        tile, coords)),
-                    line_num)
+                #Is the tile passable?
+                passable = self.sel_unit.is_passable(tile, coords)
+                self.draw_bar_text("Passable: {}".format(passable), line_num)
                 line_num += 1
+                
+                if passable:
+                    #Movement cost
+                    cost = self.sel_unit.move_cost(tile)
+                    self.draw_bar_text("Movement Cost: {}".format(cost), line_num)
+                    line_num += 1
 
             #divider
             self.draw_bar_div_line(line_num)
