@@ -328,7 +328,7 @@ class GUI(LayeredUpdates):
                 to_tile_pos = self.map.tile_coords(e.pos)
 
                 # get the unit at the mouseclick
-                unit = self.unit_at_screen_pos(e.pos)
+                unit = self.get_unit_at_screen_pos(e.pos)
                 
                 if unit:
                     # clicking the same unit again deselects it and, if
@@ -378,7 +378,7 @@ class GUI(LayeredUpdates):
             pos[1] - self.sel_unit.tile_y))
         
         # Get info about the attackee
-        atk_unit = self.unit_at_pos(pos)
+        atk_unit = unit.base_unit.BaseUnit.get_unit_at_pos(pos)
         atk_tile = self.map.tile_data(pos)
         
         # Calculate the damage
@@ -422,31 +422,15 @@ class GUI(LayeredUpdates):
                 pos,
                 self.sel_unit.move_cost,
                 self.sel_unit.is_passable))
-                        
-    def unit_at_pos(self, pos):
-        """
-        Gets the unit at a specified tile position ((x,y) tuple).
-        Returns None if no unit.
-        """
-        for u in base_unit.BaseUnit.active_units:
-            
-            #the postion of the unit in tile coords
-            unit_pos = (u.tile_x, u.tile_y)
-            
-            #compare to the desired coord
-            if unit_pos == pos:
-                return u
                 
-        return None
-                
-    def unit_at_screen_pos(self, pos):
+    def get_unit_at_screen_pos(self, pos):
         """
         Gets the unit at a specified screen position ((x,y) tuple).
         Returns None if no unit.
         """
         # Get the unit's tile position.
         tile_pos = self.map.tile_coords(pos)
-        return self.unit_at_pos(tile_pos)
+        return unit.base_unit.BaseUnit.get_unit_at_pos(tile_pos)
         
     def update_unit_rect(self, unit):
         """
@@ -557,6 +541,11 @@ class GUI(LayeredUpdates):
         if not self.map: return
         
         line_num = 0
+        
+        #Determine where the mouse is
+        mouse_pos = pygame.mouse.get_pos()
+        coords = self.map.tile_coords(mouse_pos)
+        
         #draw the background of the bar
         barRect = pygame.Rect(MAP_WIDTH, 0, BAR_WIDTH,
             self.screen.get_height())
@@ -569,35 +558,12 @@ class GUI(LayeredUpdates):
         self.draw_bar_title("DAY {}".format(self.get_cur_day()), line_num)
         line_num += 1
         
+        #Current turn
         self.draw_bar_title(
             "TEAM {}'S TURN".format(
                 TEAM_NAME[self.get_cur_team()].upper()),
             line_num)
         line_num += 1
-        
-        #divider
-        self.draw_bar_div_line(line_num)
-        line_num += 1
-
-        #title for tile section
-        self.draw_bar_title("TILE INFO", line_num)
-        line_num += 1
-        
-        #Tile coordinates
-        mouse_pos = pygame.mouse.get_pos()
-        coords = self.map.tile_coords(mouse_pos)
-        self.draw_bar_text("Coordinates: {}".format(coords), line_num)
-        line_num += 1
-
-        #Is the tile passable?
-        #We can only know if there's a unit currently selected
-        if self.sel_unit:
-            tile = self.map.tile_data(coords)
-            self.draw_bar_text(
-                "Passable: {}".format(self.sel_unit.is_passable(
-                    tile, coords)),
-                line_num)
-            line_num += 1
 
         #divider
         self.draw_bar_div_line(line_num)
@@ -605,23 +571,87 @@ class GUI(LayeredUpdates):
 
         if self.sel_unit:
             #title for tile section
-            self.draw_bar_title("UNIT INFO", line_num)
+            self.draw_bar_title("SELECTED UNIT", line_num)
             line_num += 1
-
-            #health
-            health = self.sel_unit.get_health_str()
-            self.draw_bar_text("Health: {}".format(health), line_num)
+            
+            #type
+            type = self.sel_unit.type
+            self.draw_bar_text("Type: {}".format(type), line_num)
             line_num += 1
 
             #speed
-            speed = self.sel_unit.get_speed_str()
+            speed = self.sel_unit.speed
             self.draw_bar_text("Speed: {}".format(speed), line_num)
             line_num += 1
 
-            #Facing
-            direction = self.sel_unit.get_direction()
-            self.draw_bar_text("Facing: {}".format(direction), line_num)
+            #base damage
+            speed = self.sel_unit.damage
+            self.draw_bar_text("Base Attack: {}".format(speed), line_num)
             line_num += 1
+
+            #divider
+            self.draw_bar_div_line(line_num)
+            line_num += 1
+        
+        #Get the tile data
+        tile = self.map.tile_data(coords)
+
+        if tile:
+            #title for tile section
+            self.draw_bar_title("HOVERED TILE", line_num)
+            line_num += 1
+            
+            #Tile type
+            type_name = tile.type.capitalize()
+            self.draw_bar_text("Type: {}".format(type_name), line_num)
+            line_num += 1
+            
+            #Tile coordinates
+            self.draw_bar_text("Coordinates: {}".format(coords), line_num)
+            line_num += 1
+
+            #Is the tile passable?
+            #We can only know if there's a unit currently selected
+            if self.sel_unit:
+                self.draw_bar_text(
+                    "Passable: {}".format(self.sel_unit.is_passable(
+                        tile, coords)),
+                    line_num)
+                line_num += 1
+
+            #divider
+            self.draw_bar_div_line(line_num)
+            line_num += 1
+            
+        #Get the hovered unit
+        hov_unit = unit.base_unit.BaseUnit.get_unit_at_pos(coords)
+        
+        if hov_unit:
+            #title for tile section
+            self.draw_bar_title("HOVERED UNIT", line_num)
+            line_num += 1
+            
+            #type
+            type = hov_unit.type
+            self.draw_bar_text("Type: {}".format(type), line_num)
+            line_num += 1
+
+            #speed
+            speed = hov_unit.speed
+            self.draw_bar_text("Speed: {}".format(speed), line_num)
+            line_num += 1
+
+            #base damage
+            speed = hov_unit.damage
+            self.draw_bar_text("Base Attack: {}".format(speed), line_num)
+            line_num += 1
+
+            if self.sel_unit and hov_unit.team != self.sel_unit.team:
+                #how much damage can we do?
+                pot_dmg = self.sel_unit.get_damage(hov_unit, tile)
+                self.draw_bar_text("Potential Damage: {}".format(pot_dmg),
+                                    line_num)
+                line_num += 1
 
             #divider
             self.draw_bar_div_line(line_num)
