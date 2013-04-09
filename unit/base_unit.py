@@ -110,6 +110,32 @@ class BaseUnit(Sprite):
         if self._active:
             self._active = False
             BaseUnit.active_units.remove(self)
+            
+    def face_vector(self, vector):
+        """
+        Sets the unit's angle based on the given vector (dx, dy).
+        Angle is snapped to 90-degree increments.
+        Does not change the angle if dx == dy == 0.
+        """
+        dx, dy = vector
+        
+        # Can't choose an angle if there isn't one
+        if dx == dy == 0:
+            return
+        
+        # Set the angle
+        if abs(dx) > abs(dy):
+            # Horizontal
+            if dx > 0:
+                self.set_angle(0)
+            else:
+                self.set_angle(180)
+        else:
+            # Vertical
+            if dy > 0:
+                self.set_angle(270)
+            else:
+                self.set_angle(90)
 
     def update(self):
         """
@@ -140,19 +166,9 @@ class BaseUnit(Sprite):
                 dy = helper.clamp(path_y - self.tile_y,
                                   -FRAME_MOVE_SPEED,
                                   FRAME_MOVE_SPEED)
-                
-                #by definition, units can only move horizontally or
-                #vertically, never diagonally, therefore if the unit
-                #is still moving then only one of these conditions
-                #will ever occur
-                if dx > 0:
-                    self.set_angle(0)
-                elif dy < 0:
-                    self.set_angle(90)
-                elif dx < 0:
-                    self.set_angle(180)
-                elif dy > 0:
-                    self.set_angle(270)
+                                  
+                #angle properly
+                self.face_vector((dx, dy))
 
                 #set the new value
                 self.tile_x += dx
