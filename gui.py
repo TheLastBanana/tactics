@@ -26,6 +26,7 @@ RETICLE_RATE = 0.02
 
 # RGBA colors for grid stuff
 SELECT_COLOR = (255, 255, 0, 255)
+UNMOVED_COLOR = (0, 0, 255, 196)
 MOVE_COLOR_A = (0, 0, 210, 80)
 MOVE_COLOR_B = (75, 125, 255, 120)
 ATK_COLOR_A = (255, 0, 0, 140)
@@ -487,8 +488,8 @@ class GUI(LayeredUpdates):
         LayeredUpdates.draw(self, self.screen)
         
         # draw units
-        for unit in base_unit.BaseUnit.active_units:
-            self.update_unit_rect(unit)
+        for u in base_unit.BaseUnit.active_units:
+            self.update_unit_rect(u)
         base_unit.BaseUnit.active_units.draw(self.screen)
         
         # If there's a selected unit, outline it
@@ -497,6 +498,17 @@ class GUI(LayeredUpdates):
                 self.screen,
                 self.sel_unit.rect,
                 SELECT_COLOR)
+                
+        # Outline any units that haven't finished their turns yet
+        for u in unit.base_unit.BaseUnit.active_units:
+            if (u.team == self.get_cur_team() and
+                u != self.sel_unit and
+                (u.turn_state[0] == False or
+                u.turn_state[1] == False)):
+                pygame.gfxdraw.rectangle(
+                    self.screen,
+                    u.rect,
+                    UNMOVED_COLOR)
                 
         # Mark potential targets
         for tile_pos in self._attackable_tiles:
