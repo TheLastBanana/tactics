@@ -251,13 +251,18 @@ class BaseUnit(Sprite):
         from_x, from_y = from_pos
         tiles = set()
         
+        # Get range
+        r = self.max_atk_range
+        # Add (or subtract) bonus range from occupied tile
+        r += from_tile.range_bonus
+        
         # Add the tiles in range. Not the most efficient way, but
         # probably the most readable.
         for x in range(int(from_x - r), int(from_x + r + 1)):
             for y in range(int(from_y - r), int(from_y + r + 1)):
                 
                 # Check if this is in range
-                if self.is_tile_in_range(from_pos, (x, y)):
+                if self.is_tile_in_range(from_tile, from_pos, (x, y)):
                     tiles.add((x, y))
                     
         return tiles
@@ -316,7 +321,7 @@ class BaseUnit(Sprite):
         r += from_tile.range_bonus
         
         dist = helper.manhattan_dist(from_pos, to_pos)
-        if dist < r:
+        if dist <= r:
             return True
         return False
 
