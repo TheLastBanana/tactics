@@ -20,7 +20,8 @@ class Tank(GroundUnit):
         self.type = "Tank"
         self.speed = 5
         self.atk_range = 2
-        self.damage = 4
+        self.damage = 7
+        self.defense = 3
         
     def move_cost(self, tile):
         """

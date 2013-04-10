@@ -43,6 +43,7 @@ class BaseUnit(Sprite):
         self.speed = 5
         self.atk_range = 1
         self.damage = 1
+        self.defense = 3
         self.type = "Base Unit"
         
         #set required pygame things.
@@ -286,7 +287,7 @@ class BaseUnit(Sprite):
         """
         Returns the potential attack damage against a given enemy.
         """
-        return self.damage - target_tile.defense
+        return self.damage - target_tile.defense - target.defense
         
     def get_atk_range(self, tile = None):
         """

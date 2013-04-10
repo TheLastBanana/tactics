@@ -585,8 +585,13 @@ class GUI(LayeredUpdates):
             line_num += 1
 
             #base damage
-            speed = self.sel_unit.damage
-            self.draw_bar_text("Base Attack: {}".format(speed), line_num)
+            damage = self.sel_unit.damage
+            self.draw_bar_text("Base Attack: {}".format(damage), line_num)
+            line_num += 1
+
+            #base defense
+            defense = self.sel_unit.defense
+            self.draw_bar_text("Defense: {}".format(defense), line_num)
             line_num += 1
 
             #divider
@@ -612,8 +617,9 @@ class GUI(LayeredUpdates):
             
             #Tile defense
             defense = tile.defense
-            self.draw_bar_text("Defense: +{}".format(defense), line_num)
-            line_num += 1
+            if defense != 0:
+                self.draw_bar_text("Defense: +{}".format(defense), line_num)
+                line_num += 1
 
             #We can only know if there's a unit currently selected
             if self.sel_unit:
@@ -651,15 +657,26 @@ class GUI(LayeredUpdates):
             line_num += 1
 
             #base damage
-            speed = hov_unit.damage
-            self.draw_bar_text("Base Attack: {}".format(speed), line_num)
+            damage = hov_unit.damage
+            self.draw_bar_text("Base Attack: {}".format(damage), line_num)
+            line_num += 1
+
+            #base defense
+            defense = hov_unit.defense
+            self.draw_bar_text("Defense: {}".format(defense), line_num)
             line_num += 1
 
             if self.sel_unit and hov_unit.team != self.sel_unit.team:
+                
                 #how much damage can we do?
+                FONT.set_bold(True)
+                
                 pot_dmg = self.sel_unit.get_damage(hov_unit, tile)
                 self.draw_bar_text("Potential Damage: {}".format(pot_dmg),
                                     line_num)
+                                    
+                FONT.set_bold(False)
+                
                 line_num += 1
 
             #divider
