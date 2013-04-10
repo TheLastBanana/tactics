@@ -274,8 +274,7 @@ class BaseUnit(Sprite):
         Override this for subclasses, perhaps using this as a default value.
         """
         # We can only attack within the unit's range.
-        dist = helper.manhattan_dist(from_pos, to_pos)
-        if dist > self.get_atk_range(from_tile):
+        if not self.is_tile_in_range(from_tile, from_pos, to_pos):
             return False
         
         # Get the unit we're going to attack.
