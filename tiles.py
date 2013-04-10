@@ -385,6 +385,10 @@ def find_path(tilemap,
     Returns the path between two points as a list of tile coordinates using
     the A* algorithm.
     If no path could be found, an empty list is returned.
+    The cost function is how much it costs to leave the given tile. This should
+    always be greater than or equal to 1, or shortest path is not guaranteed.
+    The passable function takes two parameters: tile and position. It return
+    false if the tile is not passable, and true otherwise.
     
     Code based on algorithm described in:
     http://www.policyalmanac.org/games/aStarTutorial.htm
@@ -482,6 +486,9 @@ def reachable_tiles(tilemap,
     """
     Returns a set of tiles which can be reached with a total cost of
     max_cost.
+    The cost function is how much it costs to leave the given tile.
+    The passable function takes two parameters: tile and position. It return
+    false if the tile is not passable, and true otherwise.
     
     Example use:
     >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
