@@ -7,8 +7,6 @@ class GroundUnit(BaseUnit):
     """
     The basic ground-moving unit.
     """
-    sprite = pygame.image.load("assets/tank.png")
-    
     def __init__(self, **keywords):
         #load the base class
         super().__init__(**keywords)
