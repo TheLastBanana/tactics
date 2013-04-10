@@ -20,7 +20,7 @@ class Tank(GroundUnit):
         self.type = "Tank"
         self.speed = 5
         self.atk_range = 2
-        self.damage = 7
+        self.damage = 6
         self.defense = 3
         self.hit_effect = effects.Explosion
         
