@@ -3,22 +3,22 @@ import unit, helper, effects
 from tiles import Tile
 import pygame
 
-class AntiTank(GroundUnit):
+class AntiArmour(GroundUnit):
     """
     Anti tank unit: an infantry unit that is especially strong against
     heavily armored gound units, but weak against others.
     """
-    sprite = pygame.image.load("assets/anti_tank.png")
+    sprite = pygame.image.load("assets/anti_armour.png")
     
     def __init__(self, **keywords):
         #load the image for the base class.
-        self._base_image = AntiTank.sprite
+        self._base_image = AntiArmour.sprite
 
         #load the base class
         super().__init__(**keywords)
 
         #set unit specific things.
-        self.type = "AntiTank"
+        self.type = "AntiArmour"
         self.speed = 4
         self.max_atk_range = 3
         self.damage = 3
@@ -68,4 +68,4 @@ class AntiTank(GroundUnit):
             return damage - defense
         else: return super().get_damage(target, target_tile)
 
-unit.unit_types["AntiTank"] = AntiTank
+unit.unit_types["AntiArmour"] = AntiArmour
