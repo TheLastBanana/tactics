@@ -5,8 +5,14 @@ import unit.base_unit
 # Initialize everything
 pygame.init()
 main_gui = GUI(pygame.Rect(0, 0, 800, 600), (0, 0, 0))
-main_gui.load_level("maps/basic.lvl")
 clock = pygame.time.Clock()
+argv = sys.argv[1:]
+
+# If a filename was given, load that level. Otherwise, load a default.
+level = "basic.lvl"
+if len(argv) > 0:
+    level = argv[0]
+main_gui.load_level("maps/" + level)
 
 # The main game loop
 while 1:
