@@ -3,6 +3,7 @@ __all__ = ["base_unit",
            "water_unit",
            "tank",
            "jeep",
+           "superjeep",
            "anti_armour",
            "battleship",
            "artillery"]
