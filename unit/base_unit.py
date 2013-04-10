@@ -251,17 +251,13 @@ class BaseUnit(Sprite):
         from_x, from_y = from_pos
         tiles = set()
         
-        # Get range
-        r = self.get_atk_range(from_tile)
-        
         # Add the tiles in range. Not the most efficient way, but
         # probably the most readable.
         for x in range(int(from_x - r), int(from_x + r + 1)):
             for y in range(int(from_y - r), int(from_y + r + 1)):
-                # Check if this is in range
-                dist = helper.manhattan_dist((from_pos), (x, y))
                 
-                if dist != 0 and dist <= r:
+                # Check if this is in range
+                if self.is_tile_in_range(from_pos, (x, y)):
                     tiles.add((x, y))
                     
         return tiles
@@ -296,9 +292,10 @@ class BaseUnit(Sprite):
         """
         Returns the potential attack damage against a given enemy.
         """
-        if self.damage - target_tile.defense - target.defense <= 0:
+        defense =  target_tile.defense_bonus + target.defense
+        if self.damage - defense <= 0:
             return 0
-        return self.damage - target_tile.defense - target.defense
+        return self.damage - defense
         
     def get_atk_range(self, tile = None):
         """
@@ -306,7 +303,22 @@ class BaseUnit(Sprite):
         from the given tile. If no tile is provided, this just returns the
         unit's range.
         """
-        return self.atk_range
+        return self.max_atk_range
+        
+    def is_tile_in_range(self, from_tile, from_pos, to_pos):
+        """
+        Checks to see if a tile is in attackable range from its current
+        position. Takes tile range bonus into account.
+        """
+        # Get range
+        r = self.max_atk_range
+        # Add (or subtract) bonus range from occupied tile
+        r += from_tile.range_bonus
+        
+        dist = helper.manhattan_dist(from_pos, to_pos)
+        if dist < r:
+            return True
+        return False
 
     def get_direction(self):
         """
