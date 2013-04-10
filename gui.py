@@ -624,9 +624,15 @@ class GUI(LayeredUpdates):
             line_num += 1
             
             #Tile defense
-            defense = tile.defense
+            defense = tile.defense_bonus
             if defense != 0:
                 self.draw_bar_text("Defense: +{}".format(defense), line_num)
+                line_num += 1
+                
+            #Tile range
+            range_b = tile.range_bonus
+            if range_b != 0:
+                self.draw_bar_text("Range: +{}".format(range_b), line_num)
                 line_num += 1
 
             #We can only know if there's a unit currently selected
