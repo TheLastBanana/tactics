@@ -437,16 +437,16 @@ def find_path(tilemap,
         
         # check neighbours
         for n in tilemap.tile_neighbours(cur):
-            # skip it if it doesn't exist, if we've already checked it, or
-            # if it isn't passable
+            # skip it if we've already checked it, or if it isn't passable
             if ((n in visited) or
                 (not passable(tilemap.tile_data(n), n))):
                 continue
-            
-            if n not in todo:
+                
+            if not (n in todo):
                 # we haven't looked at this tile yet, so calculate its costs
                 g = costs[cur][0] + cost(cur_data)
-                h = helper.manhattan_dist(n, end)
+                h = (helper.manhattan_dist(n, end)
+                    + HEURISTIC_COST_WEIGHT * cost(tilemap.tile_data(n)))
                 costs[n] = (g, h)
                 parents[n] = cur
                 todo.update(n, g + h)
@@ -485,27 +485,27 @@ def reachable_tiles(tilemap,
     
     Example use:
     >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
-    >>> t.tiles = [0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0,\
-                   0, 0, 0, 0, 0]
+    >>> t.tiles = [0, 0, 0, 0, 0,
+    ...            0, 0, 0, 0, 0,
+    ...            0, 0, 0, 0, 0,
+    ...            0, 0, 0, 0, 0,
+    ...            0, 0, 0, 0, 0]
     
-    >>> reachable_tiles(t, (2, 2), 2) == set([(2, 0), (1, 1), (2, 1), (3, 1), \
-        (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (1, 3), (2, 3), (3, 3), \
-        (2, 4)])
+    >>> reachable_tiles(t, (2, 2), 2) == set([(2, 0), (1, 1), (2, 1), (3, 1),
+    ... (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (1, 3), (2, 3), (3, 3), 
+    ... (2, 4)])
     True
     
     >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
-    >>> t.tiles = [0, 0, 0, 0, 1, 0,\
-                   0, 1, 1, 1, 0, 0,\
-                   0, 0, 0, 0, 1, 0,\
-                   0, 1, 1, 0, 1, 0,\
-                   0, 0, 1, 0, 0, 0,\
-                   1, 0, 0, 0, 1, 0]
+    >>> t.tiles = [0, 0, 0, 0, 1, 0,
+    ...            0, 1, 1, 1, 0, 0,
+    ...            0, 0, 0, 0, 1, 0,
+    ...            0, 1, 1, 0, 1, 0,
+    ...            0, 0, 1, 0, 0, 0,
+    ...            1, 0, 0, 0, 1, 0]
    
-    >>> reachable_tiles(t, (2, 0), 6) == set([(3, 0), (2, 0), (1, 0), \
-        (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 2)])
+    >>> reachable_tiles(t, (2, 0), 6) == set([(3, 0), (2, 0), (1, 0), (0, 0), 
+    ... (0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 2)])
     True
     """
     # tiles to check (tuples of x, y)
