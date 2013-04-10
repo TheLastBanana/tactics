@@ -253,6 +253,7 @@ class GUI(LayeredUpdates):
         
         # Get the map size
         line = map_file.readline()
+        line = line.rstrip()
         w, h = [int(x) for x in line.split('x')]
         
         # Get the number of teams
@@ -269,6 +270,7 @@ class GUI(LayeredUpdates):
         while line.find("MAP END") < 0:
             line = line.rstrip()
             line = line.split(' ')
+            print(line)
             for c in line:
                 map_tiles.append(int(c))
             line = map_file.readline()
