@@ -5,6 +5,9 @@ import pygame
 import math
 
 class Tank(BaseUnit):
+    """
+    A tank: heavily armed, but not especially fast.
+    """
     sprite = pygame.image.load("assets/tank.png")
     
     def __init__(self, **keywords):
