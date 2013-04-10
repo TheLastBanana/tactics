@@ -120,8 +120,8 @@ class GUI(LayeredUpdates):
         unit_pos = (self.sel_unit.tile_x, self.sel_unit.tile_y)
         unit_tile = self.map.tile_data(unit_pos)
         
-        # These are all the tiles in range of the unit's attack.
-        in_range = self.sel_unit.tiles_in_range(unit_tile, unit_pos)
+        # These are all the positions in range of the unit's attack.
+        in_range = self.sel_unit.positions_in_range(unit_tile, unit_pos)
         
         # Determine which tiles the unit can actually attack.
         for check_pos in in_range:

@@ -234,18 +234,24 @@ class BaseUnit(Sprite):
         
         return tile.passable
         
-    def tiles_in_range(self, from_tile, from_pos):
+    def positions_in_range(self, from_tile, from_pos):
         """
         Returns a set of all tile coordinates in range of the given tile.
         """
         from_x, from_y = from_pos
-        r = self.get_atk_range(from_tile)
         tiles = set()
         
+        # Get range
+        r = self.get_atk_range(from_tile)
+        
+        # Add the tiles in range. Not the most efficient way, but
+        # probably the most readable.
         for x in range(int(from_x - r), int(from_x + r + 1)):
             for y in range(int(from_y - r), int(from_y + r + 1)):
-                # This is in range
-                if helper.manhattan_dist((from_pos), (x, y)) <= r:
+                # Check if this is in range
+                dist = helper.manhattan_dist((from_pos), (x, y))
+                
+                if dist != 0 and dist <= r:
                     tiles.add((x, y))
                     
         return tiles
