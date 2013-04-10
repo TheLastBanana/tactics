@@ -2,7 +2,6 @@ from unit.ground_unit import GroundUnit
 import unit, helper
 from tiles import Tile
 import pygame
-import math
 
 class Tank(GroundUnit):
     """
@@ -19,7 +18,7 @@ class Tank(GroundUnit):
 
         #set unit specific things.
         self.type = "Tank"
-        self.speed = 10
+        self.speed = 5
         self.atk_range = 2
         self.damage = 4
         

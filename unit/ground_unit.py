@@ -2,7 +2,6 @@ from unit.base_unit import BaseUnit
 import unit, helper
 from tiles import Tile
 import pygame
-import math
 
 class GroundUnit(BaseUnit):
     """
