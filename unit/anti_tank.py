@@ -20,7 +20,7 @@ class AntiTank(GroundUnit):
         #set unit specific things.
         self.type = "AntiTank"
         self.speed = 4
-        self.atk_range = 3
+        self.max_atk_range = 3
         self.damage = 3
         self.bonus_damage = 5
         self.defense = 0

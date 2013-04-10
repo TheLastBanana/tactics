@@ -19,7 +19,7 @@ class Tank(GroundUnit):
         #set unit specific things.
         self.type = "Tank"
         self.speed = 5
-        self.atk_range = 2
+        self.max_atk_range = 2
         self.damage = 6
         self.defense = 3
         self.hit_effect = effects.Explosion

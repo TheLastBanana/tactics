@@ -19,7 +19,7 @@ class Jeep(GroundUnit):
         #set unit specific things.
         self.type = "Jeep"
         self.speed = 10
-        self.atk_range = 2
+        self.max_atk_range = 2
         self.damage = 5
         self.defense = 1
         self.hit_effect = effects.Ricochet
