@@ -40,7 +40,7 @@ Jeep 0 20 22 180
 Tank 0 18 22 90
 Tank 0 21 20 180
 Artillery 0 21 19 180
-AntiArmour 0 18 21 90
+Anti-Armour 0 18 21 90
 Battleship 0 27 20 90
 Battleship 0 13 27 180
 Jeep 1 11 9 270
@@ -48,7 +48,7 @@ Jeep 1 9 8 0
 Tank 1 10 7 270
 Tank 1 12 7 270
 Artillery 1 9 10 0
-AntiArmour 1 10 9 270
+Anti-Armour 1 10 9 270
 Battleship 1 2 10 270
 Battleship 1 18 1 0
 UNITS END

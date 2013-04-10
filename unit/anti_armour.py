@@ -18,7 +18,7 @@ class AntiArmour(GroundUnit):
         super().__init__(**keywords)
 
         #set unit specific things.
-        self.type = "AntiArmour"
+        self.type = "Anti-Armour"
         self.speed = 4
         self.max_atk_range = 3
         self.damage = 3
@@ -64,4 +64,4 @@ class AntiArmour(GroundUnit):
             return damage - defense
         else: return super().get_damage(target, target_tile)
 
-unit.unit_types["AntiArmour"] = AntiArmour
+unit.unit_types["Anti-Armour"] = AntiArmour
