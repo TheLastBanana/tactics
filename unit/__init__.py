@@ -4,5 +4,6 @@ __all__ = ["base_unit",
            "tank",
            "jeep",
            "anti_tank",
-           "battleship"]
+           "battleship",
+           "artillery"]
 unit_types = {}
