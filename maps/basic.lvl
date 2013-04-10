@@ -38,4 +38,5 @@ UNITS START
 Tank 0 19 19 0
 Jeep 0 15 15 0
 Tank 1 20 20 90
+AntiTank 1 18 18 270
 UNITS END
