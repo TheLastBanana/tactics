@@ -270,7 +270,6 @@ class GUI(LayeredUpdates):
         while line.find("MAP END") < 0:
             line = line.rstrip()
             line = line.split(' ')
-            print(line)
             for c in line:
                 map_tiles.append(int(c))
             line = map_file.readline()
