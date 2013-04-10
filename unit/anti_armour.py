@@ -30,15 +30,6 @@ class AntiArmour(GroundUnit):
                              'forest': 1.5,
                              'sand': 1.5}
         
-    def move_cost(self, tile):
-        """
-        Returns the cost of this unit moving over a certain tile.
-        """
-        if tile.type == 'plains':
-            return 1
-            
-        return super().move_cost(tile)
-        
     def get_damage(self, target, target_tile):
         """
         Returns the potential attack damage against a given enemy.
