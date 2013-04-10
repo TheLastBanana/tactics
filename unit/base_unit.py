@@ -226,6 +226,7 @@ class BaseUnit(Sprite):
     def move_cost(self, tile):
         """
         Returns the cost of a unit moving over a certain tile.
+        Note: this should be greater than or equal to 1!
         
         Override this for subclasses, perhaps using this as the default value.
         """
