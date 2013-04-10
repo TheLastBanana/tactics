@@ -622,6 +622,16 @@ class GUI(LayeredUpdates):
             defense = self.sel_unit.defense
             self.draw_bar_text("Defense: {}".format(defense), line_num)
             line_num += 1
+            
+            #whether this has moved
+            has_moved = self.sel_unit.turn_state[0]
+            self.draw_bar_text("Has Moved: {}".format(has_moved), line_num)
+            line_num += 1
+
+            #whether this has attacked
+            has_atk = self.sel_unit.turn_state[1]
+            self.draw_bar_text("Has Attacked: {}".format(has_atk), line_num)
+            line_num += 1
 
             #divider
             self.draw_bar_div_line(line_num)
@@ -666,9 +676,10 @@ class GUI(LayeredUpdates):
                 if passable:
                     #Movement cost
                     cost = self.sel_unit.move_cost(tile)
-                    self.draw_bar_text("Movement Cost: {}".format(cost), line_num)
+                    self.draw_bar_text("Movement Cost: {}".format(cost),
+                                        line_num)
                     line_num += 1
-
+            
             #divider
             self.draw_bar_div_line(line_num)
             line_num += 1
@@ -700,9 +711,22 @@ class GUI(LayeredUpdates):
             defense = hov_unit.defense
             self.draw_bar_text("Defense: {}".format(defense), line_num)
             line_num += 1
+            
+            #can only display this for units on current team
+            if hov_unit.team == self.get_cur_team():
+                #whether this has moved
+                has_moved = hov_unit.turn_state[0]
+                self.draw_bar_text("Has Moved: {}".format(has_moved),
+                                    line_num)
+                line_num += 1
+
+                #whether this has attacked
+                has_atk = hov_unit.turn_state[1]
+                self.draw_bar_text("Has Attacked: {}".format(has_atk),
+                                    line_num)
+                line_num += 1
 
             if self.sel_unit and hov_unit.team != self.sel_unit.team:
-                
                 #how much damage can we do?
                 FONT.set_bold(True)
                 
