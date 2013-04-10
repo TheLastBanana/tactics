@@ -2,9 +2,12 @@ import sys, pygame, tiles
 from gui import GUI
 import unit.base_unit
 
+RESOLUTION = pygame.Rect(0, 0, 800, 600)
+BG_COLOR = (32, 32, 32)
+
 # Initialize everything
 pygame.init()
-main_gui = GUI(pygame.Rect(0, 0, 800, 600), (0, 0, 0))
+main_gui = GUI(RESOLUTION, BG_COLOR)
 clock = pygame.time.Clock()
 argv = sys.argv[1:]
 
