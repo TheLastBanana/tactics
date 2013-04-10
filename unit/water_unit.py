@@ -28,14 +28,7 @@ class WaterUnit(BaseUnit):
             return False
         
         #ground units can't travel over water.
-        #It would be easier to say type != water but for consistency's
-        #sake, the list is here.
-        if (tile.type == 'plains' or
-            tile.type == 'wall' or
-            tile.type == 'sand' or
-            tile.type == 'road' or
-            tile.type == 'mountain' or
-            tile.type == 'forest'):
+        if (tile.type != 'water'):
             return False
 
         return True
