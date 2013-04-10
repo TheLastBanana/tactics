@@ -35,9 +35,8 @@ class Tank(GroundUnit):
             return False
 
         #This unit can't pass these specific terrains
-        if (tile.type == 'wall' or
-           tile.type == 'mountain' or
-           tile.type == 'forest'):
+        if (tile.type == 'mountain' or
+            tile.type == 'forest'):
             return False
         
         #The tile is passable

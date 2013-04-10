@@ -27,8 +27,8 @@ class GroundUnit(BaseUnit):
         if u and u.team != self.team and isinstance(u, GroundUnit):
             return False
         
-        #ground units can't travel over water.
-        if (tile.type == 'water'):
+        #ground units can't travel over water or through walls
+        if (tile.type == 'water' or tile.type == 'wall'):
             return False
 
         return True

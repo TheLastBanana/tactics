@@ -18,21 +18,16 @@ class Artillery(GroundUnit):
 
         #set unit specific things.
         self.type = "Artillery"
-        self.speed = 4
+        self.speed = 6
         self.max_atk_range = 5
         self.min_atk_range = 3
         self.damage = 7
         self.defense = 1
         self.hit_effect = effects.Explosion
         
-    def move_cost(self, tile):
-        """
-        Returns the cost of this unit moving over a certain tile.
-        """
-        if tile.type == 'plains':
-            return 1
-            
-        return super().move_cost(tile)
+        self._move_costs = {'plains': 1.5,
+                             'road': 1,
+                             'mountain': 3}
         
     def is_passable(self, tile, pos):
         """
@@ -44,8 +39,7 @@ class Artillery(GroundUnit):
 
         #This unit can't pass these specific terrains
         ttype = tile.type
-        if (tile.type == 'wall' or
-            tile.type == 'forest'):
+        if (tile.type == 'forest'):
             return False
         
         #The tile is passable

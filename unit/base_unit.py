@@ -307,8 +307,11 @@ class BaseUnit(Sprite):
         Returns the potential attack damage against a given enemy.
         """
         defense =  target_tile.defense_bonus + target.defense
-        if self.damage - defense <= 0:
+        
+        # Don't do negative damage
+        if self.damage - defense < 0:
             return 0
+        
         return self.damage - defense
         
     def get_atk_range(self, tile = None):

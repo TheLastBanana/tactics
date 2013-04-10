@@ -19,7 +19,7 @@ class Battleship(WaterUnit):
 
         #set unit specific things.
         self.type = "Battleship"
-        self.speed = 4
+        self.speed = 8
         self.max_atk_range = 4
         self.damage = 6
         self.defense = 3

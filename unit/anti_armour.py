@@ -26,6 +26,10 @@ class AntiArmour(GroundUnit):
         self.defense = 0
         self.hit_effect = effects.Explosion
         
+        self._move_costs = {'mountain': 2,
+                             'forest': 1.5,
+                             'sand': 1.5}
+        
     def move_cost(self, tile):
         """
         Returns the cost of this unit moving over a certain tile.
@@ -35,32 +39,24 @@ class AntiArmour(GroundUnit):
             
         return super().move_cost(tile)
         
-    def is_passable(self, tile, pos):
-        """
-        Returns whether or not this unit can move over a certain tile.
-        """
-        #Check superclass to see if it's passable first
-        if not super().is_passable(tile, pos):
-            return False
-
-        #This unit can't pass these specific terrains
-        if (tile.type == 'wall'):
-            return False
-        
-        #The tile is passable
-        return True
-        
     def get_damage(self, target, target_tile):
         """
         Returns the potential attack damage against a given enemy.
         
         This overrides the super class function for special damage
         """
-        if target.type == "Tank":
+        # Do bonus damage to armored vehicles
+        if target.type == "Tank" or target.type == "Battleship":
+            # Calculate the total damage
             damage = self.damage + self.bonus_damage
+            
+            # Calculate the unit's defense
             defense = target_tile.defense_bonus + target.defense
-            if (damage - defense <= 0):
+            
+            # Don't do negative damage
+            if (damage - defense < 0):
                 return 0
+            
             return damage - defense
         else: return super().get_damage(target, target_tile)
 
