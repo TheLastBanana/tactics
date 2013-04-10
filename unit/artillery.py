@@ -18,7 +18,7 @@ class Artillery(GroundUnit):
 
         #set unit specific things.
         self.type = "Artillery"
-        self.speed = 3
+        self.speed = 4
         self.max_atk_range = 5
         self.min_atk_range = 3
         self.damage = 7
