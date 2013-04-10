@@ -14,15 +14,6 @@ class WaterUnit(BaseUnit):
         #set unit specific things.
         self.type = "Water Unit"
         
-    def move_cost(self, tile):
-        """
-        Returns the cost of this unit moving over a certain tile.
-        """
-        if tile.type == 'water':
-            return 1
-            
-        return super().move_cost(tile)
-        
     def is_passable(self, tile, pos):
         """
         Returns whether or not this unit can move over a certain tile.
