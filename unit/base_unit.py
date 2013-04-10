@@ -260,9 +260,21 @@ class BaseUnit(Sprite):
         """
         Returns whether the given tile is attackable.
         
-        Override this for subclasses.
+        Override this for subclasses, perhaps using this as a default value.
         """
-        return False
+        # We can only attack within the unit's range.
+        dist = helper.manhattan_dist(from_pos, to_pos)
+        if dist > self.get_atk_range(from_tile):
+            return False
+        
+        # Get the unit we're going to attack.
+        u = BaseUnit.get_unit_at_pos(to_pos)
+        
+        # We can't attack if there's no unit there, or if it's on our team.
+        if not u or u.team == self.team:
+            return False
+            
+        return True
         
     def is_moving(self):
         """

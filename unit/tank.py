@@ -47,23 +47,5 @@ class Tank(BaseUnit):
         
         # Return default
         return BaseUnit.is_passable(self, tile, pos)
-        
-    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
-        """
-        Returns whether the given tile is attackable.
-        """
-        # We can only attack within the unit's range.
-        dist = helper.manhattan_dist(from_pos, to_pos)
-        if dist > self.get_atk_range(from_tile):
-            return False
-        
-        # Get the unit we're going to attack.
-        u = BaseUnit.get_unit_at_pos(to_pos)
-        
-        # We can't attack if there's no unit there, or if it's on our team.
-        if not u or u.team == self.team:
-            return False
-            
-        return True
 
 unit.unit_types["Tank"] = Tank
