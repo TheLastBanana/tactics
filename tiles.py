@@ -210,8 +210,8 @@ class TileMap(Sprite):
         """
         x, y = tile_coords
         return (
-            x * self._tile_width,
-            y * self._tile_height
+            x * self._tile_width + self.rect.x,
+            y * self._tile_height + self.rect.y
         )
         
     def tile_data(self, coords):
