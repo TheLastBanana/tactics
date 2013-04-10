@@ -27,17 +27,24 @@ class WaterUnit(BaseUnit):
         """
         Returns whether or not this unit can move over a certain tile.
         """
-        # If there's no tile there (i.e. mouse is off screen)
-        if not tile:
+        # Return default
+        if not super().is_passable(tile, pos):
             return False
-            
+                    
         # We can't pass through enemy units.
         u = BaseUnit.get_unit_at_pos(pos)
         if u and u.team != self.team and isinstance(u, WaterUnit):
             return False
         
-        # Move through water and only water
-        if tile.type == 'water':
-            return True
-        
-        return False
+        #ground units can't travel over water.
+        #It would be easier to say type != water but for consistency's
+        #sake, the list is here.
+        if (tile.type == 'plains' or
+            tile.type == 'wall' or
+            tile.type == 'sand' or
+            tile.type == 'road' or
+            tile.type == 'mountain' or
+            tile.type == 'forest'):
+            return False
+
+        return True

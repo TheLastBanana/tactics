@@ -242,7 +242,7 @@ class BaseUnit(Sprite):
         if not tile:
             return False
         
-        return tile.passable
+        return True
         
     def positions_in_range(self, from_tile, from_pos):
         """

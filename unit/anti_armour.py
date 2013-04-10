@@ -39,20 +39,16 @@ class AntiArmour(GroundUnit):
         """
         Returns whether or not this unit can move over a certain tile.
         """
-        # If there's no tile there (i.e. mouse is off screen)
-        if not tile:
+        #Check superclass to see if it's passable first
+        if not super().is_passable(tile, pos):
             return False
-            
-        # We can't pass through enemy units.
-        u = unit.base_unit.BaseUnit.get_unit_at_pos(pos)
-        if u and u.team != self.team:
+
+        #This unit can't pass these specific terrains
+        if (tile.type == 'wall'):
             return False
         
-        if tile.type == 'plains':
-            return True
-        
-        # Return default
-        return super().is_passable(tile, pos)
+        #The tile is passable
+        return True
         
     def get_damage(self, target, target_tile):
         """
