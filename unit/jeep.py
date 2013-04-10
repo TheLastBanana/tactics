@@ -24,35 +24,10 @@ class Jeep(GroundUnit):
         self.defense = 1
         self.hit_effect = effects.Ricochet
         
-    def move_cost(self, tile):
-        """
-        Returns the cost of this unit moving over a certain tile.
-        """
-        if tile.type == 'plains':
-            return 2 
-        elif (tile.type == 'sand' or
-            tile.type == 'forest'):
-            return 3
-        elif tile.type == 'road':
-            return 1
-        elif tile.type == 'mountain':
-            return 4
-            
-        return super().move_cost(tile)
-        
-    def is_passable(self, tile, pos):
-        """
-        Returns whether or not this unit can move over a certain tile.
-        """
-        #Check superclass to see if it's passable first
-        if not super().is_passable(tile, pos):
-            return False
-
-        #This unit can't pass these specific terrains
-        if (tile.type == 'wall'):
-            return False
-        
-        #The tile is passable
-        return True
+        self._move_costs = {'plains': 2,
+                             'sand': 3,
+                             'forest': 3,
+                             'road': 1,
+                             'mountain': 4}
 
 unit.unit_types["Jeep"] = Jeep

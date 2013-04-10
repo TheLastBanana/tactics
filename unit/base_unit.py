@@ -48,6 +48,9 @@ class BaseUnit(Sprite):
         self.hit_effect = None
         self.die_effect = effects.Explosion
         
+        #Dictionary of movement costs by tile type name
+        self._move_costs = {}
+        
         #set required pygame things.
         self.image = None
         self.rect = pygame.Rect(0, 0, SIZE, SIZE)
@@ -228,9 +231,15 @@ class BaseUnit(Sprite):
         Returns the cost of a unit moving over a certain tile.
         Note: this should be greater than or equal to 1!
         
-        Override this for subclasses, perhaps using this as the default value.
+        Can be overridden for special behaviour. Make sure to use this as a
+        default return value just in case.
         """
-        return 1
+        # If this is not defined, default to the lowest possible cost.
+        if tile.type not in self._move_costs:
+            return 1
+            
+        # Otherwise, return the cost.
+        return self._move_costs[tile.type]
         
     def is_passable(self, tile, pos):
         """
