@@ -21,8 +21,8 @@ class AntiArmour(GroundUnit):
         self.type = "Anti-Armour"
         self.speed = 4
         self.max_atk_range = 3
-        self.damage = 3
-        self.bonus_damage = 5
+        self.damage = 4
+        self.bonus_damage = 4
         self.defense = 0
         self.hit_effect = effects.Explosion
         
