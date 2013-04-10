@@ -16,10 +16,10 @@ tile_types = {
     0:  Tile('plains', 0, True, 0, 0),
     1:  Tile('wall', 1, False, 0, 0),
     2:  Tile('water', 2, False, 0, 0),
-    3:  Tile('sand', 3, False, 0, 0),
-    4:  Tile('road', 4, False, 0, 0),
+    3:  Tile('sand', 3, True, 0, 0),
+    4:  Tile('road', 4, True, 0, 0),
     5:  Tile('mountain', 5, False, 1, 2),
-    6:  Tile('forest', 6, False, 2, 0)
+    6:  Tile('forest', 6, True, 2, 0)
 }
 
 HIGHLIGHT_RATE = 0.0025
