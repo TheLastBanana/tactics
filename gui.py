@@ -287,33 +287,74 @@ class GUI(LayeredUpdates):
         
         map_file = open(filename, 'r')
         
-        # Get the map size
+        # Move up to the line with the team count
         line = map_file.readline()
-        line = line.rstrip()
-        w, h = [int(x) for x in line.split('x')]
+        while line.find("Teams: ") < 0:
+            line = map_file.readline()
+            if line == "":
+                raise Exception ("Expected team count")
         
         # Get the number of teams
-        line = map_file.readline()
+        line = line.lstrip("Teams: ")
         self.num_teams = int(line)
         
-        # Move up to the start of the map
-        while line.find("MAP START") < 0:
-            line = map_file.readline()
+        # Move up to the line with the tile sprites
         line = map_file.readline()
-            
-        # Read in the map
-        map_tiles = []
-        while line.find("MAP END") < 0:
-            line = line.rstrip()
-            line = line.split(' ')
-            for c in line:
-                map_tiles.append(int(c))
+        while line.find("Tiles: ") < 0:
             line = map_file.readline()
-        if len(map_tiles) != w * h:
-            raise Exception("Wrong number of tiles in {}!".format(filename))
+            if line == "":
+                raise Exception ("Expected tile file")
+        
+        # Get the number of teams
+        line = line.lstrip("Tiles: ")
+        line = line.strip()
+        tile_filename = line
+        
+        # Move up to the line with the tile size
+        line = map_file.readline()
+        while line.find("Tile size: ") < 0:
+            line = map_file.readline()
+            if line == "":
+                raise Exception ("Expected tile size")
+        
+        # Get the number of teams
+        line = line.lstrip("Tile size: ")
+        line = line.strip()
+        size = line.split('x')
+        tile_w, tile_h = size
+        
+        # Convert to ints
+        tile_w = int(tile_w)
+        tile_h = int(tile_h)
+        
+        # Move up to the line with the map file
+        line = map_file.readline()
+        while line.find("Map: ") < 0:
+            line = map_file.readline()
+            if line == "":
+                raise Exception ("Expected map filename")
+        
+        # Get the map filename
+        line = line.lstrip("Map: ")
+        line = line.strip()
+        map_filename = line
+                
+        # Load in the map image.
+        map_image = pygame.image.load(map_filename)
+        
+        # Go through the image adding tiles
+        map_tiles = []
+        for y in range(map_image.get_height()):
+            for x in range(map_image.get_width()):
+                # The tile number corresponds to the pixel colour index
+                map_tiles.append(map_image.get_at_mapped((x, y)))
         
         # Create the tile map
-        self.map = tiles.TileMap("assets/tiles.png", 20, 20, w, h)
+        self.map = tiles.TileMap(tile_filename,
+                                  tile_w,
+                                  tile_h,
+                                  map_image.get_width(),
+                                  map_image.get_height())
         self.map.set_tiles(map_tiles)
         self.add(self.map)
         
@@ -323,6 +364,8 @@ class GUI(LayeredUpdates):
         # Move up to the unit definitions
         while line.find("UNITS START") < 0:
             line = map_file.readline()
+            if line == "":
+                raise Exception ("Expected unit definitions")
         line = map_file.readline()
         
         # Create the units
@@ -346,6 +389,8 @@ class GUI(LayeredUpdates):
             self.update_unit_rect(new_unit)
             
             line = map_file.readline()
+            if line == "":
+                raise Exception ("Expected end of unit definitions")
         
     def on_click(self, e):
         """
