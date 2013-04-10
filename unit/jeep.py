@@ -18,7 +18,7 @@ class Jeep(GroundUnit):
 
         #set unit specific things.
         self.type = "Jeep"
-        self.speed = 10
+        self.speed = 8
         self.max_atk_range = 2
         self.damage = 5
         self.defense = 1
@@ -28,8 +28,13 @@ class Jeep(GroundUnit):
         """
         Returns the cost of this unit moving over a certain tile.
         """
-        if tile.type == 'plains':
-            return 1
+        if (tile.type == 'sand' or
+            tile.type == 'forest'):
+            return 1.5
+        elif tile.type == 'road':
+            return .75
+        elif tile.type == 'mountain':
+            return 2
             
         return super().move_cost(tile)
         
