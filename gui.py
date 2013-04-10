@@ -5,6 +5,7 @@ import tiles, unit, animation
 from unit import *
 from effects.explosion import Explosion
 
+# GUI size information
 MAP_WIDTH = 600
 BAR_WIDTH = 200
 BUTTON_HEIGHT = 50
@@ -65,6 +66,8 @@ class GUI(LayeredUpdates):
     # number of GUI instances
     num_instances = 0
             
+    # These functions need to be defined ahead of __init__ because they're
+    # used as variables
     def move_pressed(self):
         """
         This is called when the move button is pressed.
@@ -177,6 +180,18 @@ class GUI(LayeredUpdates):
         # Set up the screen
         self.screen = pygame.display.set_mode((screen_rect.w, screen_rect.h))
         self.screen_rect = screen_rect
+        
+        # The rect containing the info bar
+        self.bar_rect = pygame.Rect(screen_rect.w - BAR_WIDTH,
+                                     0,
+                                     BAR_WIDTH,
+                                     screen_rect.h)
+        
+        # The rect containing the map view
+        self.view_rect = pygame.Rect(0,
+                                      0,
+                                      MAP_WIDTH,
+                                      screen_rect.h)
         self.bg_color = bg_color
         self.map = None
 
@@ -280,6 +295,9 @@ class GUI(LayeredUpdates):
         self.map = tiles.TileMap("assets/tiles.png", 20, 20, w, h)
         self.map.set_tiles(map_tiles)
         self.add(self.map)
+        
+        # Center the map on-screen
+        self.map.rect.center = self.view_rect.center
         
         # Move up to the unit definitions
         while line.find("UNITS START") < 0:
@@ -556,11 +574,13 @@ class GUI(LayeredUpdates):
         coords = self.map.tile_coords(mouse_pos)
         
         #draw the background of the bar
-        barRect = pygame.Rect(MAP_WIDTH, 0, BAR_WIDTH,
-            self.screen.get_height())
-        outlineRect = pygame.Rect(MAP_WIDTH, 0, BAR_WIDTH - 1,
-            self.screen.get_height() - 1)
+        barRect = self.bar_rect
         pygame.draw.rect(self.screen, BAR_COLOR, barRect)
+        
+        #draw the outline of the bar
+        outlineRect = self.bar_rect.copy()
+        outlineRect.w -= 1
+        outlineRect.h -= 1
         pygame.draw.rect(self.screen, OUTLINE_COLOR, outlineRect, 2)
         
         #Title for turn info
@@ -708,7 +728,7 @@ class GUI(LayeredUpdates):
         line_text = FONT.render(text, True, FONT_COLOR)
         self.screen.blit(
             line_text,
-            (MAP_WIDTH + PAD, FONT_SIZE * line_num + PAD))
+            (self.bar_rect.x + PAD, FONT_SIZE * line_num + PAD))
 
     def draw_bar_title(self, text, line_num):
         """
@@ -717,7 +737,7 @@ class GUI(LayeredUpdates):
         title_text = FONT.render(text, True, FONT_COLOR)
         self.screen.blit(
             title_text,
-            (MAP_WIDTH + CENTER - (title_text.get_width()/2),
+            (self.bar_rect.centerx - (title_text.get_width()/2),
             FONT_SIZE * line_num + PAD))
 
     def draw_bar_div_line(self, line_num):
@@ -728,8 +748,8 @@ class GUI(LayeredUpdates):
         pygame.draw.line(
             self.screen,
             (50, 50, 50),
-            (MAP_WIDTH, y),
-            (MAP_WIDTH + BAR_WIDTH, y))
+            (self.bar_rect.x, y),
+            (self.bar_rect.right, y))
             
     def get_button_rect(self, button):
         """
@@ -737,7 +757,10 @@ class GUI(LayeredUpdates):
         """
         # The y-coordinate is based on its slot number
         y = self.screen.get_height() - BUTTON_HEIGHT * (button.slot + 1)
-        return pygame.Rect(MAP_WIDTH, y, BAR_WIDTH, BUTTON_HEIGHT)
+        return pygame.Rect(self.bar_rect.x,
+                            y,
+                            self.bar_rect.width,
+                            BUTTON_HEIGHT)
 
     def draw_bar_button(self, button):
         """
@@ -766,5 +789,5 @@ class GUI(LayeredUpdates):
         but_text = FONT.render(button.text, True, FONT_COLOR)
         self.screen.blit(
             but_text,
-            (MAP_WIDTH + CENTER - (but_text.get_width()/2),
+            (self.bar_rect.centerx - (but_text.get_width()/2),
             but_rect.y + (BUTTON_HEIGHT//2) - but_text.get_height()//2))
