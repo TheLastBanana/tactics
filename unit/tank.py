@@ -1,5 +1,5 @@
 from unit.ground_unit import GroundUnit
-import unit, helper
+import unit, helper, effects
 from tiles import Tile
 import pygame
 
@@ -22,6 +22,7 @@ class Tank(GroundUnit):
         self.atk_range = 2
         self.damage = 7
         self.defense = 3
+        self.hit_effect = effects.Explosion
         
     def move_cost(self, tile):
         """

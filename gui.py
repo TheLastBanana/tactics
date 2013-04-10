@@ -387,18 +387,26 @@ class GUI(LayeredUpdates):
         # Deal damage
         atk_unit.hurt(damage)
         
-        # Explode
-        self._effects.add(Explosion(self.map.screen_coords(pos)))
-        
-        # If the unit was destroyed, check if there are any others left on a
-        # team other than the selected unit
-        for u in unit.base_unit.BaseUnit.active_units:
-            if u.team != self.sel_unit.team:
-                return
+        if not atk_unit.active:
+            # Add its death effect
+            if atk_unit.die_effect:
+                self._effects.add(atk_unit.die_effect(
+                    self.map.screen_coords(pos)))
+            
+            # If the unit was destroyed, check if there are any others left on a
+            # team other than the selected unit
+            for u in unit.base_unit.BaseUnit.active_units:
+                if u.team != self.sel_unit.team:
+                    return
                 
-        # No other units, so game over!
-        self.win_team = self.sel_unit.team
-        self.mode = Modes.GameOver
+            # No other units, so game over!
+            self.win_team = self.sel_unit.team
+            self.mode = Modes.GameOver
+        
+        # Do the attack effect.
+        if self.sel_unit.hit_effect:
+            self._effects.add(self.sel_unit.hit_effect(
+                self.map.screen_coords(pos)))
     
     def sel_unit_move(self, pos):
         """

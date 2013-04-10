@@ -1,4 +1,4 @@
-import pygame, unit, helper, bmpfont
+import pygame, unit, helper, bmpfont, effects
 from pygame.sprite import Sprite
 
 FRAME_MOVE_SPEED = 3/20
@@ -45,6 +45,8 @@ class BaseUnit(Sprite):
         self.damage = 1
         self.defense = 3
         self.type = "Base Unit"
+        self.hit_effect = None
+        self.die_effect = effects.Explosion
         
         #set required pygame things.
         self.image = None
@@ -112,6 +114,13 @@ class BaseUnit(Sprite):
         if self._active:
             self._active = False
             BaseUnit.active_units.remove(self)
+    
+    @property
+    def active(self):
+        """
+        Returns whether this is active.
+        """
+        return self._active
             
     def face_vector(self, vector):
         """

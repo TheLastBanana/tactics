@@ -1,5 +1,5 @@
 from unit.ground_unit import GroundUnit
-import unit, helper
+import unit, helper, effects
 from tiles import Tile
 import pygame
 
@@ -22,6 +22,7 @@ class Jeep(GroundUnit):
         self.atk_range = 2
         self.damage = 5
         self.defense = 1
+        self.hit_effect = effects.Ricochet
         
     def move_cost(self, tile):
         """
