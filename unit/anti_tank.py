@@ -62,7 +62,7 @@ class AntiTank(GroundUnit):
         """
         if target.type == "Tank":
             damage = self.damage + self.bonus_damage
-            defense = target_tile.defense + target.defense
+            defense = target_tile.defense_bonus + target.defense
             if (damage - defense <= 0):
                 return 0
             return damage - defense
