@@ -37,7 +37,8 @@ ATK_COLOR_B = (220, 128, 0, 180)
 FONT_COLOR = (0, 0, 0)
 BAR_COLOR = (150, 150, 150)
 OUTLINE_COLOR = (50, 50, 50)
-HIGHLIGHT_COLOR = (255, 255, 255)
+BUTTON_HIGHLIGHT_COLOR = (255, 255, 255)
+BUTTON_DISABLED_COLOR = (64, 64, 64)
 
 # Names for the different teams
 TEAM_NAME = {
@@ -54,7 +55,7 @@ class Modes:
 # A container class which stores button information.
 # Each "slot" is a BUTTON_HEIGHT pixel space counting up from the bottom
 # of the screen.
-Button = namedtuple('Button', ['slot', 'text', 'onClick'])
+Button = namedtuple('Button', ['slot', 'text', 'onClick', 'condition'])
 
 class GUI(LayeredUpdates):
     """
@@ -68,6 +69,26 @@ class GUI(LayeredUpdates):
             
     # These functions need to be defined ahead of __init__ because they're
     # used as variables
+    def can_move(self):
+        """
+        Checks whether the move button can be pressed.
+        """
+        # If no unit is selected, we obviously can't.
+        if not self.sel_unit: return False
+        
+        # If the unit is done its move, we also can't.
+        return not self.sel_unit.turn_state[0]
+    
+    def can_attack(self):
+        """
+        Checks whether the attack button can be pressed.
+        """
+        # If no unit is selected, we obviously can't.
+        if not self.sel_unit: return False
+        
+        # If the unit is done its attack, we also can't.
+        return not self.sel_unit.turn_state[1]
+    
     def move_pressed(self):
         """
         This is called when the move button is pressed.
@@ -205,9 +226,9 @@ class GUI(LayeredUpdates):
         
         # Set up GUI
         self.buttons = [
-            Button(0, "MOVE", self.move_pressed),
-            Button(1, "ATTACK", self.attack_pressed),
-            Button(2, "END TURN", self.end_turn_pressed)]
+            Button(0, "MOVE", self.move_pressed, self.can_move),
+            Button(1, "ATTACK", self.attack_pressed, self.can_attack),
+            Button(2, "END TURN", self.end_turn_pressed, None)]
         
         # We start in select mode
         self.mode = Modes.Select
@@ -378,7 +399,8 @@ class GUI(LayeredUpdates):
             else:
                 # Check which button was pressed
                 for button in self.buttons:
-                    if self.get_button_rect(button).collidepoint(e.pos):
+                    if ((not button.condition or button.condition()) and
+                        self.get_button_rect(button).collidepoint(e.pos)):
                         button.onClick()
                         
     def sel_unit_attack(self, pos):
@@ -799,12 +821,21 @@ class GUI(LayeredUpdates):
         but_out_rect = but_rect
         but_out_rect.width -= 1
 
-        # Highlight on mouse over
-        mouse_pos = pygame.mouse.get_pos()
-        if but_rect.collidepoint(mouse_pos):
-            pygame.draw.rect(self.screen, HIGHLIGHT_COLOR, but_rect)
+        # Determine the button color
+        but_color = BAR_COLOR
+        
+        # The button can't be used
+        if button.condition and not button.condition():
+            but_color = BUTTON_DISABLED_COLOR
         else:
-            pygame.draw.rect(self.screen, BAR_COLOR, but_rect)
+            # The button can be used
+            mouse_pos = pygame.mouse.get_pos()
+            if but_rect.collidepoint(mouse_pos):
+                # Highlight on mouse over
+                but_color = BUTTON_HIGHLIGHT_COLOR
+        
+        # Draw the button
+        pygame.draw.rect(self.screen, but_color, but_rect)
             
         # Draw the outline
         pygame.draw.rect(self.screen, OUTLINE_COLOR, but_out_rect, 2)
