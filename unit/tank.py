@@ -6,6 +6,8 @@ import pygame
 class Tank(GroundUnit):
     """
     A tank: heavily armed, but not especially fast.
+    
+    Tanks move at a constant rate over any terrain they can pass.
     """
     sprite = pygame.image.load("assets/tank.png")
     
@@ -23,15 +25,6 @@ class Tank(GroundUnit):
         self.damage = 6
         self.defense = 3
         self.hit_effect = effects.Explosion
-        
-    def move_cost(self, tile):
-        """
-        Returns the cost of this unit moving over a certain tile.
-        """
-        if tile.type == 'plains':
-            return 1
-            
-        return super().move_cost(tile)
         
     def is_passable(self, tile, pos):
         """
