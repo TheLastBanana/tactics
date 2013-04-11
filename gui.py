@@ -106,18 +106,20 @@ class GUI(LayeredUpdates):
         # Determine where we can move.
         pos = (self.sel_unit.tile_x, self.sel_unit.tile_y)
         
-        self._movable_tiles = tiles.reachable_tiles(
+        reachable = tiles.reachable_tiles(
             self.map,
             pos,
             self.sel_unit.speed,
             self.sel_unit.move_cost,
             self.sel_unit.is_passable)
         
-        # We can't actually move to any tiles with units in them
-        for u in base_unit.BaseUnit.active_units:
-            u_pos = (u.tile_x, u.tile_y)
-            if u_pos in self._movable_tiles:
-                self._movable_tiles.remove(u_pos)
+        # Check that the tiles can actually be stopped in
+        for t_pos in reachable:
+            tile = self.map.tile_data(t_pos)
+            
+            # This can be stopped in, so add it
+            if self.sel_unit.is_stoppable(tile, t_pos):
+                self._movable_tiles.add(t_pos)
         
         # Highlight those squares
         self.map.set_highlight(

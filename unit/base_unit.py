@@ -317,6 +317,20 @@ class BaseUnit(Sprite):
         
         return True
         
+    def is_stoppable(self, tile, pos):
+        """
+        Returns whether or not a unit can stop on a certain tile.
+        Position is also passed so it can be checked for other units.
+        
+        Override this for subclasses, perhaps using this as the default value.
+        """
+        # Can't park on a unit
+        for u in BaseUnit.active_units:
+            if (u.tile_x, u.tile_y) == pos:
+                return False
+        
+        return self.is_passable(tile, pos)
+        
     def positions_in_range(self, from_tile, from_pos):
         """
         Returns a set of all tile coordinates in range of the given tile.
