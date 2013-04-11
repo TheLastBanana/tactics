@@ -654,6 +654,9 @@ class GUI(LayeredUpdates):
         #divider
         self.draw_bar_div_line(line_num)
         line_num += 1
+        
+        #Get the tile data
+        tile = self.map.tile_data(coords)
 
         if self.sel_unit:
             #title for tile section
@@ -668,6 +671,11 @@ class GUI(LayeredUpdates):
             #speed
             speed = self.sel_unit.speed
             self.draw_bar_text("Speed: {}".format(speed), line_num)
+            line_num += 1
+
+            #range
+            u_range = self.sel_unit.get_atk_range()
+            self.draw_bar_text("Range: {}".format(u_range), line_num)
             line_num += 1
 
             #base damage
@@ -693,9 +701,6 @@ class GUI(LayeredUpdates):
             #divider
             self.draw_bar_div_line(line_num)
             line_num += 1
-        
-        #Get the tile data
-        tile = self.map.tile_data(coords)
 
         if tile:
             #title for tile section
@@ -757,6 +762,11 @@ class GUI(LayeredUpdates):
             #speed
             speed = hov_unit.speed
             self.draw_bar_text("Speed: {}".format(speed), line_num)
+            line_num += 1
+
+            #range
+            u_range = hov_unit.get_atk_range()
+            self.draw_bar_text("Range: {}".format(u_range), line_num)
             line_num += 1
 
             #base damage
