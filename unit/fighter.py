@@ -21,8 +21,8 @@ class Fighter(AirUnit):
         self.speed = 16
         self.max_atk_range = 4
         self.damage = 6
-        self.defense = 1
-        self.max_fuel = 6
+        self.defense = 3
+        self.max_fuel = 7
         self.set_fuel(self.max_fuel)
         self.min_move_distance = 6
         self.hit_effect = effects.Ricochet

@@ -75,6 +75,7 @@ class AirUnit(BaseUnit):
         
         # Shrink it depending on the amount of fuel remaining
         inner_rect.w -= inner_rect.w * (1 - fuel_percent)
+        if inner_rect.w < 1: inner_rect.w = 1
         
         # Determine the colours to use
         if self.fuel > FUEL_BAD_CUTOFF:
