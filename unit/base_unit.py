@@ -392,6 +392,16 @@ class BaseUnit(Sprite):
         
         return self.damage - defense
         
+    def get_defense(self, tile = None):
+        """
+        Returns this unit's defense.
+        If a tile is specified the tile's defense bonus is added to
+        the return value.
+        """
+        if tile:
+            return self.defense + tile.defense_bonus
+        return self.defense
+        
     def get_atk_range(self, tile = None):
         """
         Returns the unit's maximum attack range, assuming that it is attacking
