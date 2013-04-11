@@ -4,6 +4,7 @@ from collections import namedtuple
 import tiles, unit, animation
 from unit import *
 from effects.explosion import Explosion
+from sounds import SoundManager
 
 # GUI size information
 MAP_WIDTH = 600
@@ -47,8 +48,8 @@ TEAM_NAME = {
 }
 
 # Possible GUI modes
-# http://stackoverflow.com/questions/702834/whats-the-common-practice-for-enums-
-# in-python
+# http://stackoverflow.com/questions/702834/whats-the-common-practice-
+# for-enums-in-python
 class Modes:
     Select, ChooseMove, Moving, ChooseAttack, GameOver = range(5)
 
@@ -59,16 +60,16 @@ Button = namedtuple('Button', ['slot', 'text', 'onClick', 'condition'])
 
 class GUI(LayeredUpdates):
     """
-    This class handles user input, and is also responsible for rendering objects
-    on-screen (including converting unit tile positions into on-screen
-    positions). Essentially, it is the middleman between objects and the actual
-    tilemap.
-    """
+    This class handles user input, and is also responsible for 
+    rendering objects on-screen (including converting unit tile 
+    positions into on-screen positions). Essentially, it is the 
+    middleman between objects and the actual tilemap.
+    """ 
     # number of GUI instances
     num_instances = 0
             
-    # These functions need to be defined ahead of __init__ because they're
-    # passed as references in the buttons.
+    # These functions need to be defined ahead of __init__ because
+    # they're passed as references in the buttons.
     def can_move(self):
         """
         Checks whether the move button can be pressed.
@@ -475,14 +476,27 @@ class GUI(LayeredUpdates):
         # Deal damage
         atk_unit.hurt(damage)
         
+        # Do the attack effect.
+        if self.sel_unit.hit_effect:
+            self._effects.add(self.sel_unit.hit_effect(
+                self.map.screen_coords(pos)))
+                
+        # Play the unit's attack sound
+        if self.sel_unit.hit_sound:
+            SoundManager.play(self.sel_unit.hit_sound)
+        
         if not atk_unit.active:
             # Add its death effect
             if atk_unit.die_effect:
                 self._effects.add(atk_unit.die_effect(
                     self.map.screen_coords(pos)))
             
-            # If the unit was destroyed, check if there are any others left on a
-            # team other than the selected unit
+            # Play its death sound
+            if atk_unit.die_sound:
+                SoundManager.play(atk_unit.die_sound)
+
+            # If the unit was destroyed, check if there are any others
+            # left on a team other than the selected unit
             for u in unit.base_unit.BaseUnit.active_units:
                 if u.team != self.sel_unit.team:
                     return
@@ -490,11 +504,6 @@ class GUI(LayeredUpdates):
             # No other units, so game over!
             self.win_team = self.sel_unit.team
             self.mode = Modes.GameOver
-        
-        # Do the attack effect.
-        if self.sel_unit.hit_effect:
-            self._effects.add(self.sel_unit.hit_effect(
-                self.map.screen_coords(pos)))
     
     def sel_unit_move(self, pos):
         """
@@ -509,6 +518,9 @@ class GUI(LayeredUpdates):
         #the tile position the unit is at
         from_tile_pos = (self.sel_unit.tile_x,
                          self.sel_unit.tile_y)
+        
+        # Play the unit's movement sound
+        SoundManager.play(self.sel_unit.move_sound)
         
         #set the path in the unit.
         self.sel_unit.set_path(
@@ -631,9 +643,9 @@ class GUI(LayeredUpdates):
 
     def draw_bar(self):
         """
-        Draws the info bar on the right side of the screen. This function is
-        unavoidably quite large, as each panel needs to be handled with separate
-        logic.
+        Draws the info bar on the right side of the screen. This 
+        function is unavoidably quite large, as each panel needs to be
+        handled with separate logic.
         """
         if not self.map: return
         
@@ -873,8 +885,8 @@ class GUI(LayeredUpdates):
     def draw_bar_button(self, button):
         """
         Renders a button to the bar.
-        If the mouse is hovering over the button it is rendered in white, else
-        rgb(50, 50, 50).
+        If the mouse is hovering over the button it is rendered in white,
+        else rgb(50, 50, 50).
         """
 
         but_rect = self.get_button_rect(button)
