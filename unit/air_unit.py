@@ -42,20 +42,6 @@ class AirUnit(BaseUnit):
 
         #set unit specific things.
         self.type = "Air Unit"
-    
-    @staticmethod
-    def is_adj_to_carrier(pos):
-        """
-        Checks if the give position is currently adjacent to a carrier.
-        """
-        for u in BaseUnit.active_units:
-            if (isinstance(u, Carrier) and
-                helper.manhattan_dist((u.tile_x, u.tile_y), pos) <= 1):
-                # This is an adjacent carrier! Rejoice!
-                return True
-        
-        # No carriers
-        return False
         
     @property
     def fuel(self):
@@ -97,6 +83,21 @@ class AirUnit(BaseUnit):
         # Draw the indicator
         pygame.gfxdraw.box(self.image, FUEL_RECT, back)
         pygame.gfxdraw.box(self.image, inner_rect, fill)
+    
+    def is_docked(self, pos):
+        """
+        Checks if the given position is currently adjacent to a carrier of the
+        same team.
+        """
+        for u in BaseUnit.active_units:
+            if (u.team == self.team and
+                isinstance(u, Carrier) and
+                helper.manhattan_dist((u.tile_x, u.tile_y), pos) <= 1):
+                # This is an adjacent carrier! Rejoice!
+                return True
+        
+        # No carriers
+        return False
         
     def activate(self):
         """
@@ -114,7 +115,7 @@ class AirUnit(BaseUnit):
         
         # Check if this is too close to stop in
         if (dist < self.min_move_distance and
-            (not AirUnit.is_adj_to_carrier(pos))):
+            (not self.is_docked(pos))):
             return False
             
         return super().is_stoppable(tile, pos)
@@ -143,7 +144,7 @@ class AirUnit(BaseUnit):
         """
         # We haven't moved, and we aren't docked, so we can't finish the turn
         if (not self.turn_state[0] and
-            not AirUnit.is_adj_to_carrier(self.tile_pos)):
+            not self.is_docked(self.tile_pos)):
             return False
         
         # Default to the superclass
@@ -157,7 +158,7 @@ class AirUnit(BaseUnit):
         super().turn_ended()
         
         # Refuel at carriers
-        if AirUnit.is_adj_to_carrier(self.tile_pos):
+        if self.is_docked(self.tile_pos):
             self.set_fuel(self.max_fuel)
             return True
         
