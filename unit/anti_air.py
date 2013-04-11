@@ -22,9 +22,13 @@ class AntiAir(GroundUnit):
         self.speed = 6
         self.max_atk_range = 4
         self.damage = 2
-        self.bonus_damage = 4
-        self.defense = 1
+        self.bonus_damage = 7
+        self.defense = 2
         self.hit_effect = effects.Ricochet
+        
+        self._move_costs = {'plains': 1.5,
+                             'road': 1,
+                             'mountain': 3}
         
     def is_passable(self, tile, pos):
         """
@@ -49,7 +53,7 @@ class AntiAir(GroundUnit):
         special damage effects.
         """
         # Do bonus damage to armored vehicles
-        if target.type == "Fighter" or target.type == "Bomber":
+        if isinstance(target, unit.air_unit.AirUnit):
             # Calculate the total damage
             damage = self.damage + self.bonus_damage
             
