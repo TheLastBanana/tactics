@@ -31,7 +31,7 @@ class SoundManager:
                 return
         
         # Play the sound, no extra args needed, defaults are fine
-        _sounds[sound_name].play()
+        SoundManager._sounds[sound_name].play()
     
     @staticmethod
     def _load(name):
@@ -47,7 +47,7 @@ class SoundManager:
             file_name = "assets/{}.wav".format(name)
             
             # Load from path and save to the dictionary
-            _sounds[name] = Sound(file = file_name)
+            SoundManager._sounds[name] = Sound(file = file_name)
             
             # Return success
             return True
