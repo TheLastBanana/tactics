@@ -52,6 +52,9 @@ class BaseUnit(Sprite):
         self.type = "Base Unit"
         self.hit_effect = None
         self.die_effect = effects.Explosion
+        self.move_sound = None
+        self.hit_sound = None
+        self.die_sound = None
         
         #Dictionary of movement costs by tile type name
         self._move_costs = {}
