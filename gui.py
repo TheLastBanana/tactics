@@ -536,7 +536,7 @@ class GUI(LayeredUpdates):
         
         # The unit is finished moving, so go back to select
         if self.mode == Modes.Moving:
-            if (not self.sel_unit) or (not self.sel_unit.is_moving()):
+            if (not self.sel_unit) or (not self.sel_unit.is_moving):
                 self.change_mode(Modes.Select)
                 
         # Update the reticle effect
@@ -619,8 +619,9 @@ class GUI(LayeredUpdates):
 
     def draw_bar(self):
         """
-        Draws the info bar on the right side of the screen, polls the mouse
-        location to find which tile is currently being hovered over.
+        Draws the info bar on the right side of the screen. This function is
+        unavoidably quite large, as each panel needs to be handled with separate
+        logic.
         """
         if not self.map: return
         

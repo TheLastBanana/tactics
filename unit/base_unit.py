@@ -124,6 +124,13 @@ class BaseUnit(Sprite):
         Returns whether this is active.
         """
         return self._active
+    
+    @property
+    def is_moving(self):
+        """
+        Returns whether or not a unit is currently in transit.
+        """
+        return self._moving
             
     def face_vector(self, vector):
         """
@@ -295,12 +302,6 @@ class BaseUnit(Sprite):
             return False
             
         return True
-        
-    def is_moving(self):
-        """
-        Returns whether or not a unit is currently in transit.
-        """
-        return self._moving
         
     def get_damage(self, target, target_tile):
         """
