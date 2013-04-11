@@ -63,7 +63,7 @@ class AntiAir(GroundUnit):
         This overrides the super class function to allow
         special damage effects.
         """
-        # Do bonus damage to armored vehicles
+        # Do bonus damage to air units
         if isinstance(target, unit.air_unit.AirUnit):
             # Calculate the total damage
             damage = self.damage + self.bonus_damage
