@@ -113,6 +113,17 @@ class AirUnit(BaseUnit):
             
         return super().is_stoppable(tile, pos)
         
+    def get_defense(self, tile = None):
+        """
+        Returns this unit's defense.
+        If a tile is specified the tile's defense bonus is added to
+        the return value.
+        
+        Overrides the superclass method because planes are unaffected
+        by terrain bonus defense.
+        """
+        return self.defense
+        
     def set_fuel(self, fuel):
         """
         Changes the fuel amount and updates the graphic.
@@ -169,3 +180,19 @@ class AirUnit(BaseUnit):
 
         # Air units can pass over everything else
         return True
+        
+    def is_tile_in_range(self, from_tile, from_pos, to_pos):
+        """
+        Checks to see if a tile is in attackable range from its current
+        position. Takes tile range bonus into account.
+        
+        Overrides superclass method because planes are unaffected
+        by terrain range bonus.
+        """
+        # Get range
+        r = self.max_atk_range
+        
+        dist = helper.manhattan_dist(from_pos, to_pos)
+        if dist <= r:
+            return True
+        return False
