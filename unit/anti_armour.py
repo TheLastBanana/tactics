@@ -42,7 +42,7 @@ class AntiArmour(GroundUnit):
             damage = self.damage + self.bonus_damage
             
             # Calculate the unit's defense
-            defense = target_tile.defense_bonus + target.defense
+            defense = target.get_defense(tile = target_tile)
             
             # Don't do negative damage
             if (damage - defense < 0):

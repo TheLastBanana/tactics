@@ -384,7 +384,8 @@ class BaseUnit(Sprite):
         """
         Returns the potential attack damage against a given enemy.
         """
-        defense =  target_tile.defense_bonus + target.defense
+        # Get the unit's current defense.
+        defense =  target.get_defense(target_tile)
         
         # Don't do negative damage
         if self.damage - defense < 0:

@@ -53,8 +53,8 @@ class AntiAir(GroundUnit):
             # Calculate the total damage
             damage = self.damage + self.bonus_damage
             
-            # Calculate the unit's defense
-            defense = target.get_defense()
+            # Get the unit's current defense
+            defense = target.get_defense(tile = target_tile)
             
             # Don't do negative damage
             if (damage - defense < 0):
