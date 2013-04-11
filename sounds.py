@@ -19,10 +19,16 @@ class SoundManager:
         Plays a requested sound. If the sound isn't already loaded then
         the sound is loaded first.
         """
+        if not sound_name:
+            return
         
         # Load sound if not already loaded
-        if soundName not in SoundManager:
-            SoundManager._load(sound_name)
+        if sound_name not in SoundManager._sounds:
+            
+            # Check if the sound load is successful
+            if not SoundManager._load(sound_name):
+                # Return if it did not load successfully
+                return
         
         # Play the sound, no extra args needed, defaults are fine
         _sounds[sound_name].play()
@@ -33,6 +39,9 @@ class SoundManager:
         Loads a .wav file as a pygame.mixer.Sound and places it into the 
         dictionary.
         """
+        if not name:
+            return False
+
         try:
             # Construct the path
             file_name = "assets/{}.wav".format(name)
@@ -46,3 +55,4 @@ class SoundManager:
         # Problem loading the sound
         except pygame.error:
             print("Exception loading sound file \"{}\".".format(name))
+            return False
