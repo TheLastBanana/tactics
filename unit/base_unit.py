@@ -12,7 +12,7 @@ class BaseUnit(Sprite):
     from which the unit renders its actual image.
     """
     
-    active_units = pygame.sprite.Group()
+    active_units = pygame.sprite.LayeredUpdates()
     
     health_font = bmpfont.BitmapFont("assets/healthfont.png", 6, 7, 48)
     
@@ -378,6 +378,19 @@ class BaseUnit(Sprite):
         unit's range.
         """
         return self.max_atk_range
+        
+    def can_turn_end(self):
+        """
+        Returns whether the player can end his turn. Sometimes, a unit may need
+        to block the turn from ending by returning false.
+        """
+        return True
+        
+    def turn_ended(self):
+        """
+        Called when the turn for this unit's team has ended.
+        """
+        self.turn_state = [False, False]
         
     def is_tile_in_range(self, from_tile, from_pos, to_pos):
         """

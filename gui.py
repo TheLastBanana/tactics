@@ -172,6 +172,13 @@ class GUI(LayeredUpdates):
         This is called when the end turn button is pressed.
         Advances to the next turn.
         """
+        # Check if the turn can actually end
+        for unit in base_unit.BaseUnit.active_units:
+            if not unit.can_turn_end():
+                # If not, switch to that unit
+                self.sel_unit = unit
+                return
+        
         # advance turn
         self.current_turn += 1
         
@@ -184,7 +191,7 @@ class GUI(LayeredUpdates):
         # Reset the turn states of all units
         for unit in base_unit.BaseUnit.active_units:
             if unit.team == self.cur_team:
-                unit.turn_state = [False, False]
+                unit.turn_ended()
 
     def __init__(self, screen_rect, bg_color):
         """
