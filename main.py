@@ -5,7 +5,7 @@ RESOLUTION = pygame.Rect(0, 0, 800, 600)
 BG_COLOR = (32, 32, 32)
 
 # Initialize everything
-pygame.mixer.pre_init(22050, -16, 2, 512)
+pygame.mixer.pre_init(22050, -16, 2, 512) # Small buffer for less sound lag
 pygame.init()
 main_gui = GUI(RESOLUTION, BG_COLOR)
 clock = pygame.time.Clock()
