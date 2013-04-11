@@ -10,5 +10,6 @@ __all__ = ['base_unit',
            'carrier',
            'artillery',
            'fighter',
-           'anti_air']
+           'anti_air',
+           'bomber']
 unit_types = {}
