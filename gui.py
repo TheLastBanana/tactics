@@ -68,7 +68,7 @@ class GUI(LayeredUpdates):
     num_instances = 0
             
     # These functions need to be defined ahead of __init__ because they're
-    # used as variables
+    # passed as references in the buttons.
     def can_move(self):
         """
         Checks whether the move button can be pressed.
@@ -183,7 +183,7 @@ class GUI(LayeredUpdates):
         
         # Reset the turn states of all units
         for unit in base_unit.BaseUnit.active_units:
-            if unit.team == self.get_cur_team():
+            if unit.team == self.cur_team:
                 unit.turn_state = [False, False]
 
     def __init__(self, screen_rect, bg_color):
@@ -245,14 +245,16 @@ class GUI(LayeredUpdates):
         
         # This will store effects which are drawn over everything else
         self._effects = pygame.sprite.Group()
-        
-    def get_cur_team(self):
+    
+    @property
+    def cur_team(self):
         """
         Gets the current team based on the turn.
         """
         return (self.current_turn) % self.num_teams
-        
-    def get_cur_day(self):
+    
+    @property
+    def cur_day(self):
         """
         Gets the current day based on the turn.
         """
@@ -412,7 +414,7 @@ class GUI(LayeredUpdates):
 
                     # select a new unit
                     elif (self.mode == Modes.Select and
-                          unit.team == self.get_cur_team()):
+                          unit.team == self.cur_team):
                         self.sel_unit = unit
                     elif (self.mode == Modes.ChooseAttack and
                         self.sel_unit and
@@ -567,7 +569,7 @@ class GUI(LayeredUpdates):
                 
         # Outline any units that haven't finished their turns yet
         for u in unit.base_unit.BaseUnit.active_units:
-            if (u.team == self.get_cur_team() and
+            if (u.team == self.cur_team and
                 u != self.sel_unit and
                 (u.turn_state[0] == False or
                 u.turn_state[1] == False)):
@@ -639,13 +641,13 @@ class GUI(LayeredUpdates):
         pygame.draw.rect(self.screen, OUTLINE_COLOR, outlineRect, 2)
         
         #Title for turn info
-        self.draw_bar_title("DAY {}".format(self.get_cur_day()), line_num)
+        self.draw_bar_title("DAY {}".format(self.cur_day), line_num)
         line_num += 1
         
         #Current turn
         self.draw_bar_title(
             "TEAM {}'S TURN".format(
-                TEAM_NAME[self.get_cur_team()].upper()),
+                TEAM_NAME[self.cur_team].upper()),
             line_num)
         line_num += 1
 
@@ -768,7 +770,7 @@ class GUI(LayeredUpdates):
             line_num += 1
             
             #can only display this for units on current team
-            if hov_unit.team == self.get_cur_team():
+            if hov_unit.team == self.cur_team:
                 #whether this has moved
                 has_moved = hov_unit.turn_state[0]
                 self.draw_bar_text("Has Moved: {}".format(has_moved),
