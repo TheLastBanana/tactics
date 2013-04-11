@@ -26,6 +26,10 @@ class Jeep(GroundUnit):
 
         #load the base class
         super().__init__(**keywords)
+        
+        #sounds
+        self.move_sound = "JeepMove"
+        self.hit_sound = "MachineGunFire"
 
         #set unit specific things.
         self.type = "Jeep"
