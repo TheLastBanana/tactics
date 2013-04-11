@@ -30,44 +30,35 @@ class TileMap(Sprite):
     A class which renders a grid of tiles from a spritesheet.
     """
     
-    def __init__(self, sheet_name, tile_width, tile_height,
-        map_width, map_height):
+    def __init__(self, sheet_name, tile_width, tile_height):
         """
         sheet_name: the filename of the sprite sheet to use
         tile_width: the width of each tile, in pixels
         tile_height: the height of each tile, in pixels
-        map_width: the width of map, in tiles
-        map_height: the height of the map, in tiles
         """
         
         # Set up map info
         self._sprite_sheet = pygame.image.load(sheet_name)
         self._tile_width = tile_width
         self._tile_height = tile_height
-        self._map_width = map_width
-        self._map_height = map_height
+        self._map_width = None
+        self._map_height = None
         self._tiles = []
         self._highlights = {}
-        
-        # Fill the list with empty tiles
-        for i in range(self._tile_count()):
-            self._tiles.append(0)
         
         Sprite.__init__(self)
         
         # These are required for a pygame Sprite
-        self.image = pygame.Surface(
-            (self._tile_width * self._map_width,
-            self._tile_height * self._map_height)
-        )
-        self._base_image = self.image.copy()
-        self.rect = self.image.get_rect()
+        self.image = None
+        self._base_image = None
+        self.rect = pygame.Rect(0, 0, 0, 0)
         
     def _tile_count(self):
         """
         Returns the number of tiles on the map.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t._tile_count()
         25
         """
@@ -78,7 +69,8 @@ class TileMap(Sprite):
         Returns a tile's coordinates in tile units within the map given its
         index in the list.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t._tile_position(12)
         (2, 2)
         """
@@ -88,7 +80,8 @@ class TileMap(Sprite):
         """
         Returns true if a tile exists, or false if it doesn't
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t._tile_exists((2, 2))
         True
         >>> t._tile_exists((-2, -1))
@@ -107,7 +100,8 @@ class TileMap(Sprite):
         Returns a tile's index in the list given its tile coordinates in tile
         units. Returns -1 if the provided coordinates are invalid.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t._tile_index((2, 2))
         12
         """
@@ -137,8 +131,11 @@ class TileMap(Sprite):
         """
         Redraws all the tiles onto the base image.
         """
-        # clear the image
-        self._base_image.fill((0, 0, 0, 0))
+        # Create the empty surface
+        self._base_image = pygame.Surface(
+            (self._tile_width * self._map_width,
+            self._tile_height * self._map_height)
+        )
         
         # draw in each tile
         for i in range(self._tile_count()):
@@ -160,7 +157,7 @@ class TileMap(Sprite):
             # draw the tile
             self._base_image.blit(self._sprite_sheet, (x, y), area)
             
-    def set_tiles(self, tiles):
+    def _set_tiles(self, tiles):
         """
         Sets the list of tiles.
         """
@@ -171,15 +168,54 @@ class TileMap(Sprite):
             
     def get_tiles(self):
         """
-        Returns the list of tiles.
+        Returns a copy of the list of tiles.
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
+        >>> t.get_tiles() == [0, 1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ...                   0, 0, 0, 0, 0, 0, 0, 0]
+        True
         """
         return self._tiles[:]
+            
+    def load_from_file(self, filename):
+        """
+        Loads tile data from the given image file.
+        The image file should be have an 8-bit indexed palette. Each colour
+        index corresponds to the tile (e.g. colour index 2 = tile type 2)
+        
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
+        >>> t.rect
+        <rect(0, 0, 100, 100)>
+        >>> t.get_tiles() == [0, 1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ...                   0, 0, 0, 0, 0, 0, 0, 0]
+        True
+        """
+        tiles = []
+        
+        # Load in the map image.
+        map_image = pygame.image.load(filename)
+        self._map_width, self._map_height = map_image.get_size()
+        self.rect.w = self._map_width * self._tile_width
+        self.rect.h = self._map_height * self._tile_height
+        
+        # Go through the image adding tiles
+        map_tiles = []
+        for y in range(map_image.get_height()):
+            for x in range(map_image.get_width()):
+                # The tile number corresponds to the pixel colour index
+                tiles.append(map_image.get_at_mapped((x, y)))
+        
+        # Set the tiles
+        self._set_tiles(tiles)
         
     def get_tile_size(self):
         """
         Returns a tuple containing a tile's width and height within this map.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t.get_tile_size()
         (20, 20)
         """
@@ -190,7 +226,8 @@ class TileMap(Sprite):
         Returns the tile coordinates within this TileMap that the given screen
         coordinates fall into.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t.tile_coords((45, 22))
         (2, 1)
         """
@@ -204,7 +241,8 @@ class TileMap(Sprite):
         """
         Returns the screen coordinates of a given tile.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t.screen_coords((3, 4))
         (60, 80)
         """
@@ -218,12 +256,11 @@ class TileMap(Sprite):
         """
         Returns the tile data for a given tile.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 2, 2)
-        >>> t.tiles = [0, 0,\
-                       0, 1]
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t.tile_data((0, 0)) == tile_types[0]
         True
-        >>> t.tile_data((1, 1)) == tile_types[1]
+        >>> t.tile_data((1, 1)) == tile_types[6]
         True
         
         """
@@ -238,14 +275,12 @@ class TileMap(Sprite):
         Returns all neighbour coordinates to a given tile. Does not return
         coordinates which do not exist.
         
-        >>> t = TileMap("assets/tiles.png", 20, 20, 3, 3)
-        >>> t.tiles = [0, 0, 0,
-        ...            0, 0, 0,
-        ...            0, 0, 0]
+        >>> t = TileMap("assets/tiles.png", 20, 20)
+        >>> t.load_from_file("maps/test-1.gif")
         >>> t.tile_neighbours((0, 0))
         [(1, 0), (0, 1)]
-        >>> t.tile_neighbours((2, 2))
-        [(2, 1), (1, 2)]
+        >>> t.tile_neighbours((4, 4))
+        [(4, 3), (3, 4)]
         >>> t.tile_neighbours((1, 1))
         [(1, 0), (2, 1), (0, 1), (1, 2)]
         """
@@ -394,25 +429,16 @@ def find_path(tilemap,
     http://www.policyalmanac.org/games/aStarTutorial.htm
     
     Example use:
-    >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
-    >>> t.tiles = [0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0]
+    >>> t = TileMap("assets/tiles.png", 20, 20)
+    >>> t.load_from_file("maps/test-2.gif")
     
     >>> find_path(t, (0, 0), (4, 4))
     [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
     >>> find_path(t, (0, 0), (5, 5))
     []
     
-    >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
-    >>> t.tiles = [0, 0, 0, 0, 1, 0,
-    ...            0, 1, 1, 1, 0, 0,
-    ...            0, 0, 0, 0, 1, 0,
-    ...            0, 1, 1, 0, 1, 0,
-    ...            0, 0, 1, 0, 0, 0,
-    ...            1, 0, 0, 0, 1, 0]
+    >>> t = TileMap("assets/tiles.png", 20, 20)
+    >>> t.load_from_file("maps/test-3.gif")
    
     >>> expected_path = [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2),
     ... (3, 2), (3, 3), (3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
@@ -490,25 +516,16 @@ def reachable_tiles(tilemap,
     false if the tile is not passable, and true otherwise.
     
     Example use:
-    >>> t = TileMap("assets/tiles.png", 20, 20, 5, 5)
-    >>> t.tiles = [0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0,
-    ...            0, 0, 0, 0, 0]
+    >>> t = TileMap("assets/tiles.png", 20, 20)
+    >>> t.load_from_file("maps/test-2.gif")
     
     >>> reachable_tiles(t, (2, 2), 2) == set([(2, 0), (1, 1), (2, 1), (3, 1),
     ... (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (1, 3), (2, 3), (3, 3), 
     ... (2, 4)])
     True
     
-    >>> t = TileMap("assets/tiles.png", 20, 20, 6, 6)
-    >>> t.tiles = [0, 0, 0, 0, 1, 0,
-    ...            0, 1, 1, 1, 0, 0,
-    ...            0, 0, 0, 0, 1, 0,
-    ...            0, 1, 1, 0, 1, 0,
-    ...            0, 0, 1, 0, 0, 0,
-    ...            1, 0, 0, 0, 1, 0]
+    >>> t = TileMap("assets/tiles.png", 20, 20)
+    >>> t.load_from_file("maps/test-3.gif")
    
     >>> reachable_tiles(t, (2, 0), 6) == set([(3, 0), (2, 0), (1, 0), (0, 0), 
     ... (0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 2)])

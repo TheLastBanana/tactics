@@ -338,24 +338,12 @@ class GUI(LayeredUpdates):
         line = line.lstrip("Map: ")
         line = line.strip()
         map_filename = line
-                
-        # Load in the map image.
-        map_image = pygame.image.load(map_filename)
-        
-        # Go through the image adding tiles
-        map_tiles = []
-        for y in range(map_image.get_height()):
-            for x in range(map_image.get_width()):
-                # The tile number corresponds to the pixel colour index
-                map_tiles.append(map_image.get_at_mapped((x, y)))
         
         # Create the tile map
         self.map = tiles.TileMap(tile_filename,
                                   tile_w,
-                                  tile_h,
-                                  map_image.get_width(),
-                                  map_image.get_height())
-        self.map.set_tiles(map_tiles)
+                                  tile_h)
+        self.map.load_from_file(map_filename)
         self.add(self.map)
         
         # Center the map on-screen
