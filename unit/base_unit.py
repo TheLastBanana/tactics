@@ -110,6 +110,13 @@ class BaseUnit(Sprite):
             return "West"
         elif angle == 270:
             return "South"
+            
+    @property
+    def tile_pos(self):
+        """
+        Returns the unit's tile position.
+        """
+        return (self.tile_x, self.tile_y)
                 
     def _update_image(self):
         """

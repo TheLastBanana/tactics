@@ -25,14 +25,31 @@ class AirUnit(BaseUnit):
     """
     def __init__(self, **keywords):
         #Number of turns worth of remaining fuel.
-        self.max_fuel = 6
+        self.max_fuel = 1
         self._fuel = self.max_fuel
+        
+        # Minimum movement distance
+        self.min_move_distance = 1
         
         #load the base class
         super().__init__(**keywords)
 
         #set unit specific things.
         self.type = "Air Unit"
+    
+    @staticmethod
+    def is_adj_to_carrier(pos):
+        """
+        Checks if the give position is currently adjacent to a carrier.
+        """
+        for u in BaseUnit.active_units:
+            if (isinstance(u, Carrier) and
+                helper.manhattan_dist((u.tile_x, u.tile_y), pos) <= 1):
+                # This is an adjacent carrier! Rejoice!
+                return True
+        
+        # No carriers
+        return False
         
     @property
     def fuel(self):
@@ -40,7 +57,6 @@ class AirUnit(BaseUnit):
         The unit's remaining fuel.
         """
         return self._fuel
-        
         
     def _update_image(self):
         """
@@ -83,20 +99,18 @@ class AirUnit(BaseUnit):
         super().activate()
         BaseUnit.active_units.change_layer(self, AIR_LAYER)
         
-    def is_adj_to_carrier(self):
+    def is_stoppable(self, tile, pos):
         """
-        Checks if the unit is currently adjacent to a carrier.
+        Returns whether or not a unit can stop on a certain tile.
         """
-        for u in BaseUnit.active_units:
-            if (isinstance(u, Carrier) and
-                helper.manhattan_dist(
-                    (u.tile_x, u.tile_y),
-                    (self.tile_x, self.tile_y)) <= 1):
-                # This is an adjacent carrier! Rejoice!
-                return True
+        dist = helper.manhattan_dist((self.tile_x, self.tile_y), pos)
         
-        # No carriers
-        return False
+        # Check if this is too close to stop in
+        if (dist < self.min_move_distance and
+            (not AirUnit.is_adj_to_carrier(pos))):
+            return False
+            
+        return super().is_stoppable(tile, pos)
         
     def set_fuel(self, fuel):
         """
@@ -110,7 +124,8 @@ class AirUnit(BaseUnit):
         Returns whether the player turn can end.
         """
         # We haven't moved, and we aren't docked, so we can't finish the turn
-        if not self.turn_state[0] and not self.is_adj_to_carrier():
+        if (not self.turn_state[0] and
+            not AirUnit.is_adj_to_carrier(self.tile_pos)):
             return False
         
         # Default to the superclass
@@ -124,7 +139,7 @@ class AirUnit(BaseUnit):
         super().turn_ended()
         
         # Refuel at carriers
-        if self.is_adj_to_carrier():
+        if AirUnit.is_adj_to_carrier(self.tile_pos):
             self.set_fuel(self.max_fuel)
             return True
         

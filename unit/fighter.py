@@ -22,6 +22,9 @@ class Fighter(AirUnit):
         self.max_atk_range = 4
         self.damage = 6
         self.defense = 1
+        self.max_fuel = 6
+        self.set_fuel(self.max_fuel)
+        self.min_move_distance = 6
         self.hit_effect = effects.Ricochet
 
 unit.unit_types["Fighter"] = Fighter
