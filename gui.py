@@ -179,9 +179,6 @@ class GUI(LayeredUpdates):
                 self.sel_unit = unit
                 return
         
-        # advance turn
-        self.current_turn += 1
-        
         # reset game mode
         self.change_mode(Modes.Select)
         
@@ -190,8 +187,14 @@ class GUI(LayeredUpdates):
         
         # Reset the turn states of all units
         for unit in base_unit.BaseUnit.active_units:
-            if unit.team == self.cur_team:
-                unit.turn_ended()
+            # This is the current team's unit, so call its turn end function
+            if unit.team == self.cur_team and not unit.turn_ended():
+                    # The unit died! Add its death effect
+                    if unit.die_effect:
+                        self._effects.add(unit.die_effect(unit.rect.topleft))
+        
+        # advance turn
+        self.current_turn += 1
 
     def __init__(self, screen_rect, bg_color):
         """
@@ -575,15 +578,15 @@ class GUI(LayeredUpdates):
                 SELECT_COLOR)
                 
         # Outline any units that haven't finished their turns yet
-        for u in unit.base_unit.BaseUnit.active_units:
-            if (u.team == self.cur_team and
-                u != self.sel_unit and
-                (u.turn_state[0] == False or
-                u.turn_state[1] == False)):
-                pygame.gfxdraw.rectangle(
-                    self.screen,
-                    u.rect,
-                    UNMOVED_COLOR)
+        #~ for u in unit.base_unit.BaseUnit.active_units:
+            #~ if (u.team == self.cur_team and
+                #~ u != self.sel_unit and
+                #~ (u.turn_state[0] == False or
+                #~ u.turn_state[1] == False)):
+                #~ pygame.gfxdraw.rectangle(
+                    #~ self.screen,
+                    #~ u.rect,
+                    #~ UNMOVED_COLOR)
                 
         # Mark potential targets
         for tile_pos in self._attackable_tiles:
@@ -676,25 +679,27 @@ class GUI(LayeredUpdates):
             self.draw_bar_text("Type: {}".format(type), line_num)
             line_num += 1
 
-            #speed
+            #speed/range
             speed = self.sel_unit.speed
-            self.draw_bar_text("Speed: {}".format(speed), line_num)
-            line_num += 1
-
-            #range
             u_range = self.sel_unit.get_atk_range()
-            self.draw_bar_text("Range: {}".format(u_range), line_num)
+            self.draw_bar_text(
+                "Speed: {}  |  Range: {}".format(speed, u_range), line_num)
             line_num += 1
 
-            #base damage
+            #damage/defense
             damage = self.sel_unit.damage
-            self.draw_bar_text("Base Attack: {}".format(damage), line_num)
-            line_num += 1
-
-            #base defense
             defense = self.sel_unit.defense
-            self.draw_bar_text("Defense: {}".format(defense), line_num)
+            self.draw_bar_text(
+                "Attack: {}  |  Defense: {}".format(damage, defense), line_num)
             line_num += 1
+            
+            #fuel remaining
+            if isinstance(self.sel_unit, unit.air_unit.AirUnit):
+                fuel = self.sel_unit.fuel
+                max_fuel = self.sel_unit.max_fuel
+                self.draw_bar_text(
+                    "Fuel: {}/{}".format(fuel, max_fuel), line_num)
+                line_num += 1
             
             #whether this has moved
             has_moved = self.sel_unit.turn_state[0]
@@ -767,25 +772,27 @@ class GUI(LayeredUpdates):
             self.draw_bar_text("Type: {}".format(type), line_num)
             line_num += 1
 
-            #speed
+            #speed/range
             speed = hov_unit.speed
-            self.draw_bar_text("Speed: {}".format(speed), line_num)
-            line_num += 1
-
-            #range
             u_range = hov_unit.get_atk_range()
-            self.draw_bar_text("Range: {}".format(u_range), line_num)
+            self.draw_bar_text(
+                "Speed: {}  |  Range: {}".format(speed, u_range), line_num)
             line_num += 1
 
-            #base damage
+            #damage/defense
             damage = hov_unit.damage
-            self.draw_bar_text("Base Attack: {}".format(damage), line_num)
-            line_num += 1
-
-            #base defense
             defense = hov_unit.defense
-            self.draw_bar_text("Defense: {}".format(defense), line_num)
+            self.draw_bar_text(
+                "Attack: {}  |  Defense: {}".format(damage, defense), line_num)
             line_num += 1
+            
+            #fuel remaining
+            if isinstance(hov_unit, unit.air_unit.AirUnit):
+                fuel = hov_unit.fuel
+                max_fuel = hov_unit.max_fuel
+                self.draw_bar_text(
+                    "Fuel: {}/{}".format(fuel, max_fuel), line_num)
+                line_num += 1
             
             #can only display this for units on current team
             if hov_unit.team == self.cur_team:

@@ -389,8 +389,10 @@ class BaseUnit(Sprite):
     def turn_ended(self):
         """
         Called when the turn for this unit's team has ended.
+        Returns True if the unit is still alive, and False otherwise.
         """
         self.turn_state = [False, False]
+        return True
         
     def is_tile_in_range(self, from_tile, from_pos, to_pos):
         """
