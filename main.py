@@ -1,6 +1,5 @@
 import sys, pygame, tiles
 from gui import GUI
-import unit.base_unit
 
 RESOLUTION = pygame.Rect(0, 0, 800, 600)
 BG_COLOR = (32, 32, 32)
