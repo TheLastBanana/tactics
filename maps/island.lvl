@@ -4,6 +4,7 @@ Tile size: 20x20
 Map: maps/island.gif
 
 UNITS START
+Anti-Air 0 22 22 180
 Jeep 0 19 20 90
 Jeep 0 20 22 180
 Tank 0 18 22 90
@@ -14,6 +15,7 @@ Battleship 0 27 20 90
 Battleship 0 13 27 180
 Carrier 0 28 28 0
 Fighter 0 28 27 180
+Anti-Air 1 9 6 0
 Jeep 1 11 9 270
 Jeep 1 9 8 0
 Tank 1 10 7 270
