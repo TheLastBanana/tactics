@@ -8,6 +8,8 @@ class BaseUnit(Sprite):
     """
     The basic representation of a unit from which all other unit types
     extend.
+    Note: self._base_image MUST be set in subclasses! This is the tilesheet
+    from which the unit renders its actual image.
     """
     
     active_units = pygame.sprite.Group()
@@ -70,6 +72,44 @@ class BaseUnit(Sprite):
                 return u
         
         return None
+    
+    @property
+    def active(self):
+        """
+        Returns whether this is active.
+        """
+        return self._active
+    
+    @property
+    def angle(self):
+        """
+        The unit's angle.
+        """
+        return self._angle
+    
+    @property
+    def is_moving(self):
+        """
+        Returns whether or not a unit is currently in transit.
+        """
+        return self._moving
+    
+    @property
+    def direction(self):
+        """
+        Returns the unit's angle as a cardinal direcion
+            (i.e. North, South, East, West).
+        """
+        angle = abs(self._angle % 360)
+
+        if angle == 0:
+            return "East"
+        elif angle == 90:
+            return "North"
+        elif angle == 180:
+            return "West"
+        elif angle == 270:
+            return "South"
                 
     def _update_image(self):
         """
@@ -82,11 +122,15 @@ class BaseUnit(Sprite):
                               self.rect.h)
         try:
             subsurf = self._base_image.subsurface(subrect)
-        except:
-            raise Exception(
+        except ValueError:
+            # No sprite for this team
+            raise ValueError(
                 "Class {} does not have a sprite for team {}!".format(
                     self.__class__.__name__, self.team))
-    
+        except AttributeError:
+            # No image is loaded
+            return
+        
         # Rotate the sprite
         self.image = pygame.transform.rotate(subsurf, self._angle)
 
@@ -117,26 +161,38 @@ class BaseUnit(Sprite):
         if self._active:
             self._active = False
             BaseUnit.active_units.remove(self)
-    
-    @property
-    def active(self):
-        """
-        Returns whether this is active.
-        """
-        return self._active
-    
-    @property
-    def is_moving(self):
-        """
-        Returns whether or not a unit is currently in transit.
-        """
-        return self._moving
             
     def face_vector(self, vector):
         """
         Sets the unit's angle based on the given vector (dx, dy).
         Angle is snapped to 90-degree increments.
         Does not change the angle if dx == dy == 0.
+        
+        >>> u = BaseUnit()
+        
+        >>> u.face_vector((1, 0))
+        >>> u.angle
+        0
+        
+        >>> u.face_vector((-1, 0))
+        >>> u.angle
+        180
+        
+        >>> u.face_vector((0, 1))
+        >>> u.angle
+        270
+        
+        >>> u.face_vector((0, -1))
+        >>> u.angle
+        90
+        
+        >>> u.face_vector((2, 1))
+        >>> u.angle
+        0
+        
+        >>> u.face_vector((-10, 8))
+        >>> u.angle
+        180
         """
         dx, dy = vector
         
@@ -337,19 +393,3 @@ class BaseUnit(Sprite):
         if dist <= r:
             return True
         return False
-
-    def get_direction(self):
-        """
-        Returns the unit's angle as a cardinal direcion
-            (i.e. North, South, East, West).
-        """
-        angle = abs(self._angle % 360)
-
-        if angle == 0:
-            return "East"
-        elif angle == 90:
-            return "North"
-        elif angle == 180:
-            return "West"
-        elif angle == 270:
-            return "South"
