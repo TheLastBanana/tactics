@@ -565,7 +565,3 @@ def reachable_tiles(tilemap,
                 reachable.add(n)
     
     return reachable
-        
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
