@@ -7,6 +7,7 @@ BG_COLOR = (32, 32, 32)
 # Initialize everything
 pygame.mixer.pre_init(22050, -16, 2, 512) # Small buffer for less sound lag
 pygame.init()
+pygame.display.set_caption("Tactics")
 main_gui = GUI(RESOLUTION, BG_COLOR)
 clock = pygame.time.Clock()
 argv = sys.argv[1:]
