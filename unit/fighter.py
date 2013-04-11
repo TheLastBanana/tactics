@@ -6,6 +6,17 @@ import pygame
 class Fighter(AirUnit):
     """
     A fighter jet. Moves fast, but needs to refuel constantly.
+    
+    Armour: High
+    Speed: Very High
+    Range: Medium
+    Damage: Medium
+    Fuel: Low
+    
+    Other notes:
+    - In order to maintain its high speed, the fighter has fairly low fuel.
+      Make well-planned strafing runs and be sure you can get back to a carrier
+      in time!
     """
     sprite = pygame.image.load("assets/fighter.png")
     
@@ -20,7 +31,7 @@ class Fighter(AirUnit):
         self.type = "Fighter"
         self.speed = 16
         self.max_atk_range = 4
-        self.damage = 6
+        self.damage = 5
         self.defense = 3
         self.max_fuel = 7
         self.set_fuel(self.max_fuel)

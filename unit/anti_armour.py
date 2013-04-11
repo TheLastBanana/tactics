@@ -5,8 +5,19 @@ import pygame
 
 class AntiArmour(GroundUnit):
     """
-    Anti tank unit: an infantry unit that is especially strong against
-    heavily armored gound units, but weak against others.
+    An infantry unit armed with an anti-armour missile launcher. Very 
+    effective against tanks and battleships, but otherwise not especially
+    powerful.
+    
+    Armour: None
+    Speed: Low
+    Range: Medium
+    Damage: Medium (High against armoured vehicles)
+    
+    Other notes:
+    - Slightly slowed by forests and sand.
+    - Slowed somewhat more by mountains.
+    - Can move through any land terrain.
     """
     sprite = pygame.image.load("assets/anti_armour.png")
     

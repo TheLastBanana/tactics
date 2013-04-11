@@ -5,8 +5,18 @@ import pygame
 
 class AntiAir(GroundUnit):
     """
-    An AA gun, not too heavily armed, but not especially fast and not
-    especially fast, but it does wonders to protect troops from planes.
+    An AA gun. Ineffective against ground units, but it does wonders to protect
+    troops from aircraft of all kinds.
+    
+    Armour: Medium
+    Speed: Medium
+    Range: Medium
+    Damage: Low (High against aircraft)
+    
+    Other notes:
+    - Moves fastest on roads, and is slightly slowed on softer terrain.
+    - Moves very slowly on mountains.
+    - Too large to move through forests.
     """
     sprite = pygame.image.load("assets/anti_air.png")
     
@@ -27,6 +37,7 @@ class AntiAir(GroundUnit):
         self.hit_effect = effects.Ricochet
         
         self._move_costs = {'plains': 1.5,
+                             'sand': 1.5,
                              'road': 1,
                              'mountain': 3}
         

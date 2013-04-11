@@ -21,7 +21,13 @@ FUEL_FILL_COLOUR_HALF = (180, 255, 0, 255)
 
 class AirUnit(BaseUnit):
     """
-    The basic air-moving unit. Runs out of fuel and needs to dock.
+    The basic air-moving unit.
+    
+    - Must move a minimum distance every turn unless docked at a carrier
+    - Gradually runs out of fuel unless docked at a carrier
+    - When fuel reaches 0, the unit will die
+    - Only collides with other air units
+    - Does not get tile bonuses
     """
     def __init__(self, **keywords):
         #Number of turns worth of remaining fuel.

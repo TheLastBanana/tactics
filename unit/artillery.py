@@ -5,7 +5,19 @@ import pygame
 
 class Artillery(GroundUnit):
     """
-    A jeep: lightly armored and armed, but fast.
+    An artillery piece mounted on treads. Has a huge attack range and high
+    damage, but this comes at the cost of being unable to target units which are
+    too close. Make sure to protect it!
+    
+    Armour: Low
+    Speed: Medium
+    Range: Very High
+    Damage: Very High
+    
+    Other notes:
+    - Moves fastest on roads, and is slightly slowed on softer terrain.
+    - Moves very slowly on mountains.
+    - Too large to move through forests.
     """
     sprite = pygame.image.load("assets/artillery.png")
     
@@ -26,6 +38,7 @@ class Artillery(GroundUnit):
         self.hit_effect = effects.Explosion
         
         self._move_costs = {'plains': 1.5,
+                             'sand': 1.5,
                              'road': 1,
                              'mountain': 3}
         

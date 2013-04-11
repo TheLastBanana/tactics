@@ -6,6 +6,8 @@ import pygame
 class WaterUnit(BaseUnit):
     """
     A unit which moves through water rather than land.
+    
+    - Only collides with other water units.
     """
     def __init__(self, **keywords):
         #load the base class

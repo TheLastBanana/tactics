@@ -5,7 +5,18 @@ import pygame
 
 class Jeep(GroundUnit):
     """
-    A jeep: lightly armored and armed, but fast.
+    A jeep. Lightly armored and armed, but fast.
+    
+    Armour: Low
+    Speed: High
+    Range: Low
+    Damage: Medium
+    
+    Other notes:
+    - Can move through any land terrain.
+    - The jeep's wheels are designed for travel on a road, so moving through any
+      other terrain type will decrease its speed. Forests and mountains are
+      especially difficult to traverse.
     """
     sprite = pygame.image.load("assets/jeep.png")
     

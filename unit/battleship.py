@@ -5,8 +5,17 @@ import pygame
 
 class Battleship(WaterUnit):
     """
-    A battleship: basically, the tank of the ocean. It has high range so it can
-    hit land targets.
+    An armoured battleship. Basically, the tank of the ocean. Excels at
+    attacking other naval units as well as anything along the coast.
+    
+    Armour: High
+    Speed: High
+    Range: High
+    Damage: High
+    
+    Other notes:
+    - Despite its high stats, this unit is constrained to the water, so its
+      uses are fairly specialized.
     """
     sprite = pygame.image.load("assets/battleship.png")
     

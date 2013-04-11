@@ -5,8 +5,17 @@ import pygame
 
 class Carrier(WaterUnit):
     """
-    An aircraft carrier. Slow, and has minimal attack, but it can refuel
-    aircraft!
+    An aircraft carrier. Not designed for battle; instead, it provides a spot
+    for up to 4 aircraft to dock.
+    
+    Armour: Medium
+    Speed: Low
+    Range: Low
+    Damage: Low
+    
+    Other notes:
+    - Aircraft can stop moving and refuel on any of the 4 tiles adjacent to this
+      unit.
     """
     sprite = pygame.image.load("assets/carrier.png")
     

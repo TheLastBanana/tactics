@@ -7,7 +7,10 @@ SIZE = 20
 class BaseUnit(Sprite):
     """
     The basic representation of a unit from which all other unit types
-    extend.
+    extend. Has a graphical representation and moves around the screen as well
+    as storing and calculating information regarding movement and attacks for
+    its unit type.
+    
     Note: self._base_image MUST be set in subclasses! This is the tilesheet
     from which the unit renders its actual image.
     """

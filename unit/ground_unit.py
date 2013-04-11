@@ -6,6 +6,9 @@ import pygame
 class GroundUnit(BaseUnit):
     """
     The basic ground-moving unit.
+    
+    - Only collides with other ground units
+    - Gains bonuses (and debuffs) from tiles.
     """
     def __init__(self, **keywords):
         #load the base class

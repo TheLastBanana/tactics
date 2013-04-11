@@ -5,9 +5,18 @@ import pygame
 
 class Tank(GroundUnit):
     """
-    A tank: heavily armed, but not especially fast.
+    A tank. Heavily armed, heavily armoured, and equipped with powerful treads.
     
-    Tanks move at a constant rate over any terrain they can pass.
+    Armour: High
+    Speed: Medium
+    Range: Low
+    Damage: High
+    
+    Other notes:
+    - Too big to fit through a forest and too wide to fit through narrow
+      mountain passes.
+    - Its treads allow for a constant rate of movement over any terrain that it
+      can pass.
     """
     sprite = pygame.image.load("assets/tank.png")
     

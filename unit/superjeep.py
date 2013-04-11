@@ -5,7 +5,19 @@ import pygame
 
 class SuperJeep(Jeep):
     """
-    An incredibly fast jeep: like a jeep, but it moves way further.
+    A jeep with at least four different nitrous engines. Engineers said it
+    couldn't be done; the Healthy and Safety council said it shouldn't be done;
+    the military's economist said it couldn't be afforded. The last two were
+    probably right, and yet here we are with a jeep that moves at a a thousand
+    miles per hour.
+    
+    Armour: Low
+    Speed: Ridiculously High
+    Range: Low
+    Damage: Medium
+    
+    Other notes:
+    - Used for testing pathfinding.
     """
     def __init__(self, **keywords):
         #load the base class
