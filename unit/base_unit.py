@@ -380,9 +380,12 @@ class BaseUnit(Sprite):
         # Get the unit we're going to attack.
         u = BaseUnit.get_unit_at_pos(to_pos)
         
-        # We can't attack if there's no unit there, if it's on ourteam,
-        # or if there is some special function defined.
-        if not u or u.team == self.team or not self.can_hit(u):
+        # We can't attack if there's no unit there, if it's on our team,
+        # if we can't hit this particular unit, or if the damage is 0
+        if (not u
+            or u.team == self.team
+            or not self.can_hit(u)
+            or self.get_damage(u, to_tile) == 0):
             return False
             
         return True
@@ -398,7 +401,7 @@ class BaseUnit(Sprite):
             return 0
 
         # Get the unit's current defense.
-        defense =  target.get_defense(target_tile)
+        defense = target.get_defense(target_tile)
         
         # Don't do negative damage
         if self.damage - defense < 0:
