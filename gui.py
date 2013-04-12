@@ -111,12 +111,18 @@ class GUI(LayeredUpdates):
         # Determine where we can move.
         pos = (self.sel_unit.tile_x, self.sel_unit.tile_y)
         
+        # These will be used in pathfinding
+        cost = lambda c: (
+            self.sel_unit.move_cost(self.map.tile_data(c)))
+        passable = lambda c: (
+            self.sel_unit.is_passable(self.map.tile_data(c), c))
+        
         reachable = tiles.reachable_tiles(
             self.map,
             pos,
             self.sel_unit.speed,
-            self.sel_unit.move_cost,
-            self.sel_unit.is_passable)
+            cost,
+            passable)
         
         # Check that the tiles can actually be stopped in
         for t_pos in reachable:
@@ -534,14 +540,20 @@ class GUI(LayeredUpdates):
         # Play the unit's movement sound
         SoundManager.play(self.sel_unit.move_sound)
         
+        # These will be used in pathfinding
+        cost = lambda c: (
+            self.sel_unit.move_cost(self.map.tile_data(c)))
+        passable = lambda c: (
+            self.sel_unit.is_passable(self.map.tile_data(c), c))
+        
         #set the path in the unit.
         self.sel_unit.set_path(
             tiles.find_path(
                 self.map,
                 from_tile_pos,
                 pos,
-                self.sel_unit.move_cost,
-                self.sel_unit.is_passable))
+                cost,
+                passable))
                 
     def get_unit_at_screen_pos(self, pos):
         """

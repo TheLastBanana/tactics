@@ -414,16 +414,15 @@ def better_tile(a, b, start, end):
 def find_path(tilemap,
                 start,
                 end,
-                cost = lambda tile: 1,
-                passable = lambda tile, pos: tile.passable):
+                cost = lambda pos: 1,
+                passable = lambda pos: True):
     """
     Returns the path between two points as a list of tile coordinates using
     the A* algorithm.
     If no path could be found, an empty list is returned.
-    The cost function is how much it costs to leave the given tile. This should
+    The cost function is how much it costs to leave the given node. This should
     always be greater than or equal to 1, or shortest path is not guaranteed.
-    The passable function takes two parameters: tile and position. It return
-    false if the tile is not passable, and true otherwise.
+    The passable function returns whether the given node.
     
     Code based on algorithm described in:
     http://www.policyalmanac.org/games/aStarTutorial.htm
@@ -439,10 +438,12 @@ def find_path(tilemap,
     
     >>> t = TileMap("assets/tiles.png", 20, 20)
     >>> t.load_from_file("maps/test-3.gif")
+    >>> cost = lambda c: 1
+    >>> passable = lambda c: t.tile_data(c).passable
    
-    >>> expected_path = [(2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (1, 2), (2, 2),
-    ... (3, 2), (3, 3), (3, 4), (4, 4), (5, 4), (5, 3), (5, 2), (5, 1), (4, 1)]
-    >>> find_path(t, (2, 0), (4, 1)) == expected_path
+    >>> find_path(t, (2, 0), (4, 1), cost, passable) == [(2, 0), (1, 0), (0, 0),
+    ... (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3), (3, 4), (4, 4), (5, 4),
+    ... (5, 3), (5, 2), (5, 1), (4, 1)]
     True
     """
     # tiles to check (tuples of (x, y), cost)
@@ -462,19 +463,18 @@ def find_path(tilemap,
         todo.tie_breaker = lambda a,b: better_tile(a, b, start, end)
     
         cur, c = todo.pop_smallest()
-        cur_data = tilemap.tile_data(cur)
         visited.add(cur)
         
         # check neighbours
         for n in tilemap.tile_neighbours(cur):
             # skip it if we've already checked it, or if it isn't passable
             if ((n in visited) or
-                (not passable(tilemap.tile_data(n), n))):
+                (not passable(n))):
                 continue
                 
             if not (n in todo):
                 # we haven't looked at this tile yet, so calculate its costs
-                g = costs[cur][0] + cost(cur_data)
+                g = costs[cur][0] + cost(cur)
                 h = helper.manhattan_dist(n, end)
                 costs[n] = (g, h)
                 parents[n] = cur
@@ -482,7 +482,7 @@ def find_path(tilemap,
             else:
                 # if we've found a better path, update it
                 g, h = costs[n]
-                new_g = costs[cur][0] + cost(cur_data)
+                new_g = costs[cur][0] + cost(cur)
                 if new_g < g:
                     g = new_g
                     todo.update(n, g + h)
@@ -506,14 +506,14 @@ def find_path(tilemap,
 def reachable_tiles(tilemap,
                       start,
                       max_cost,
-                      cost = lambda tile: 1,
-                      passable = lambda tile, pos: tile.passable):
+                      cost = lambda pos: 1,
+                      passable = lambda pos: True):
     """
     Returns a set of tiles which can be reached with a total cost of
     max_cost.
-    The cost function is how much it costs to leave the given tile.
-    The passable function takes two parameters: tile and position. It return
-    false if the tile is not passable, and true otherwise.
+    The cost function is how much it costs to leave the given node. This should
+    always be greater than or equal to 1, or shortest path is not guaranteed.
+    The passable function returns whether the given node.
     
     Example use:
     >>> t = TileMap("assets/tiles.png", 20, 20)
@@ -526,9 +526,11 @@ def reachable_tiles(tilemap,
     
     >>> t = TileMap("assets/tiles.png", 20, 20)
     >>> t.load_from_file("maps/test-3.gif")
+    >>> cost = lambda c: 1
+    >>> passable = lambda c: t.tile_data(c).passable
    
-    >>> reachable_tiles(t, (2, 0), 6) == set([(3, 0), (2, 0), (1, 0), (0, 0), 
-    ... (0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 2)])
+    >>> reachable_tiles(t, (2, 0), 6, cost, passable) == set([(3, 0), (2, 0),
+    ... (1, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 2)])
     True
     """
     # tiles to check (tuples of x, y)
@@ -544,7 +546,6 @@ def reachable_tiles(tilemap,
     
     while todo:
         cur, c = todo.pop_smallest()
-        cur_data = tilemap.tile_data(cur)
         visited.add(cur)
         
         # it's too expensive to get here, so don't bother checking
@@ -556,11 +557,11 @@ def reachable_tiles(tilemap,
             # skip it if it doesn't exist, if we've already checked it, or
             # if it isn't passable
             if ((n in visited) or
-                (not passable(tilemap.tile_data(n), n))):
+                (not passable(n))):
                 continue
             
             # try updating the tile's cost
-            new_cost = c + cost(cur_data)
+            new_cost = c + cost(cur)
             if todo.update(n, new_cost) and new_cost <= max_cost:
                 reachable.add(n)
     
