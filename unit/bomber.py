@@ -38,7 +38,7 @@ class Bomber(AirUnit):
         self.speed = 10
         self.max_atk_range = 1
         self.damage = 4
-        self.defense = 5
+        self.defense = 4
         self.bonus_land_damage = 4
         self.bonus_water_damage = 3
         self.max_fuel = 12
