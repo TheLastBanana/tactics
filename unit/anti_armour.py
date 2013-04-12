@@ -18,6 +18,7 @@ class AntiArmour(GroundUnit):
     - Slightly slowed by forests and sand.
     - Slowed somewhat more by mountains.
     - Can move through any land terrain.
+    - Can't hit air units.
     """
     sprite = pygame.image.load("assets/anti_armour.png")
     
@@ -75,7 +76,7 @@ class AntiArmour(GroundUnit):
         # Get the unit we're going to attack.
         u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
         
-        # Artillery can't hit an air unit.
+        # Can't hit an air unit.
         if u and isinstance(u, unit.air_unit.AirUnit):
             return False
             

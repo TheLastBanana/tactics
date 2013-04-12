@@ -18,6 +18,7 @@ class Artillery(GroundUnit):
     - Moves fastest on roads, and is slightly slowed on softer terrain.
     - Moves very slowly on mountains.
     - Too large to move through forests.
+    - Can't hit air units.
     """
     sprite = pygame.image.load("assets/artillery.png")
     

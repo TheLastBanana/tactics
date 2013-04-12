@@ -17,6 +17,7 @@ class Tank(GroundUnit):
       mountain passes.
     - Its treads allow for a constant rate of movement over any terrain
       that it can pass.
+    - Can't hit air units.
     """
     sprite = pygame.image.load("assets/tank.png")
     
@@ -64,7 +65,7 @@ class Tank(GroundUnit):
         # Get the unit we're going to attack.
         u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
         
-        # Artillery can't hit an air unit.
+        # Can't hit an air unit.
         if u and isinstance(u, unit.air_unit.AirUnit):
             return False
             
