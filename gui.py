@@ -6,6 +6,10 @@ from unit import *
 from effects.explosion import Explosion
 from sounds import SoundManager
 
+# Sound names
+SELECT_SOUND = "Select"
+BUTTON_SOUND = "Button"
+
 # GUI size information
 MAP_WIDTH = 600
 BAR_WIDTH = 200
@@ -429,6 +433,9 @@ class GUI(LayeredUpdates):
                     elif (self.mode == Modes.Select and
                           unit.team == self.cur_team):
                         self.sel_unit = unit
+                        SoundManager.play(SELECT_SOUND)
+                        
+                    # Attack
                     elif (self.mode == Modes.ChooseAttack and
                         self.sel_unit and
                         to_tile_pos in self._attackable_tiles):
@@ -447,9 +454,14 @@ class GUI(LayeredUpdates):
             else:
                 # Check which button was pressed
                 for button in self.buttons:
+                    # If the button is enabled and has a click function, call
+                    # the function
                     if ((not button.condition or button.condition()) and
                         self.get_button_rect(button).collidepoint(e.pos)):
                         button.onClick()
+                        
+                        # Play the button sound
+                        SoundManager.play(BUTTON_SOUND)
                         
     def sel_unit_attack(self, pos):
         """
