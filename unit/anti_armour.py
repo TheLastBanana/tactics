@@ -30,7 +30,7 @@ class AntiArmour(GroundUnit):
         
         #sounds
         self.move_sound = "FeetMove"
-        self.hit_sound = "MachineGunFire"
+        self.hit_sound = "RocketLaunch"
 
         #set unit specific things.
         self.type = "Anti-Armour"
