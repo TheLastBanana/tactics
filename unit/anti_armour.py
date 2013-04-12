@@ -46,12 +46,35 @@ class AntiArmour(GroundUnit):
                              'forest': 1.5,
                              'sand': 1.5}
         
+    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+        """
+        Returns whether the given tile is attackable.
+        
+        Overrides this to deal with not being able to hit air units.
+        """        
+        # Get the unit we're going to attack.
+        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
+        
+        # Artillery can't hit an air unit.
+        if u and isinstance(u, unit.air_unit.AirUnit):
+            return False
+            
+        return super().is_attackable(from_tile,
+                                     from_pos,
+                                     to_tile,
+                                     to_pos)
+        
     def get_damage(self, target, target_tile):
         """
         Returns the potential attack damage against a given enemy.
         
         This overrides the super class function for special damage
+        and because anti-armour can't hit air units.
         """
+        # Artillery can't hit air unit.
+        if isinstance(target, unit.air_unit):
+            return 0
+        
         # Do bonus damage to armored vehicles
         if target.type == "Tank" or target.type == "Battleship":
             # Calculate the total damage
@@ -65,24 +88,8 @@ class AntiArmour(GroundUnit):
                 return 0
             
             return damage - defense
-        else: return super().get_damage(target, target_tile)
-        
-    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
-        """
-        Returns whether the given tile is attackable.
-        
-        Overrides this to deal with not being able to hit air units.
-        """        
-        # Get the unit we're going to attack.
-        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
-        
-        # Can't hit an air unit.
-        if u and isinstance(u, unit.air_unit.AirUnit):
-            return False
             
-        return super().is_attackable(from_tile,
-                                     from_pos,
-                                     to_tile,
-                                     to_pos)
+        else:
+            return super().get_damage(target, target_tile)
 
 unit.unit_types["Anti-Armour"] = AntiArmour

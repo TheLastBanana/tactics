@@ -73,5 +73,19 @@ class Tank(GroundUnit):
                                      from_pos,
                                      to_tile,
                                      to_pos)
+                                     
+    def get_damage(self, target, target_tile):
+        """
+        Returns the potential attack damage against a given enemy.
+        
+        This overrides the super class function because tanks can't
+        hit air units.
+        """
+        # Artillery can't hit air unit.
+        if isinstance(target, unit.air_unit):
+            return 0
+
+        else:
+            return super().get_damage(target, target_tile)
 
 unit.unit_types["Tank"] = Tank
