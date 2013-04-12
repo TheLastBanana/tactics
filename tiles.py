@@ -411,14 +411,14 @@ def better_tile(a, b, start, end):
             else:
                 return False
             
-def find_path(tilemap,
+def find_path(graph,
                 start,
                 end,
                 cost = lambda pos: 1,
                 passable = lambda pos: True):
     """
-    Returns the path between two points as a list of tile coordinates using
-    the A* algorithm.
+    Returns the path between two nodes as a list of nodes using the A*
+    algorithm.
     If no path could be found, an empty list is returned.
     The cost function is how much it costs to leave the given node. This should
     always be greater than or equal to 1, or shortest path is not guaranteed.
@@ -466,7 +466,7 @@ def find_path(tilemap,
         visited.add(cur)
         
         # check neighbours
-        for n in tilemap.neighbours(cur):
+        for n in graph.neighbours(cur):
             # skip it if we've already checked it, or if it isn't passable
             if ((n in visited) or
                 (not passable(n))):
@@ -503,14 +503,13 @@ def find_path(tilemap,
     
     return path
     
-def reachable_tiles(tilemap,
+def reachable_tiles(graph,
                       start,
                       max_cost,
                       cost = lambda pos: 1,
                       passable = lambda pos: True):
     """
-    Returns a set of tiles which can be reached with a total cost of
-    max_cost.
+    Returns a set of nodes which can be reached with a total cost of max_cost.
     The cost function is how much it costs to leave the given node. This should
     always be greater than or equal to 1, or shortest path is not guaranteed.
     The passable function returns whether the given node.
@@ -553,7 +552,7 @@ def reachable_tiles(tilemap,
             continue
         
         # check neighbours
-        for n in tilemap.neighbours(cur):
+        for n in graph.neighbours(cur):
             # skip it if it doesn't exist, if we've already checked it, or
             # if it isn't passable
             if ((n in visited) or
