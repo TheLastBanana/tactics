@@ -188,6 +188,10 @@ class GUI(LayeredUpdates):
         # Check if the turn can actually end
         for unit in base_unit.BaseUnit.active_units:
             if unit.team == self.cur_team and not unit.can_turn_end():
+                
+                # Make sure the game mode is changed back to Select
+                self.change_mode(Modes.Select)
+                
                 # If not, switch to that unit
                 self.sel_unit = unit
                 return
