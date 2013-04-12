@@ -2,6 +2,7 @@ tactics
 =======
 
 A tactics game battle system along the lines of Advance Wars or Fire Emblem.
+Programmed Elliot Colp and Braedy Kuzma.
 
 Installing/Running
 ------------------
