@@ -27,13 +27,13 @@ class Carrier(WaterUnit):
         super().__init__(**keywords)
         
         #sounds
-        self.hit_sound = "Artillery"
+        self.hit_sound = "MachineGunFire"
 
         #set unit specific things.
         self.type = "Carrier"
         self.speed = 4
         self.max_atk_range = 2
-        self.damage = 3
+        self.damage = 4
         self.defense = 2
         self.hit_effect = effects.Ricochet
 
