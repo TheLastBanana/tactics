@@ -270,18 +270,18 @@ class TileMap(Sprite):
         
         return tile_types[self._tiles[index]]
         
-    def tile_neighbours(self, coords):
+    def neighbours(self, coords):
         """
         Returns all neighbour coordinates to a given tile. Does not return
         coordinates which do not exist.
         
         >>> t = TileMap("assets/tiles.png", 20, 20)
         >>> t.load_from_file("maps/test-1.gif")
-        >>> t.tile_neighbours((0, 0))
+        >>> t.neighbours((0, 0))
         [(1, 0), (0, 1)]
-        >>> t.tile_neighbours((4, 4))
+        >>> t.neighbours((4, 4))
         [(4, 3), (3, 4)]
-        >>> t.tile_neighbours((1, 1))
+        >>> t.neighbours((1, 1))
         [(1, 0), (2, 1), (0, 1), (1, 2)]
         """
         x, y = coords
@@ -466,7 +466,7 @@ def find_path(tilemap,
         visited.add(cur)
         
         # check neighbours
-        for n in tilemap.tile_neighbours(cur):
+        for n in tilemap.neighbours(cur):
             # skip it if we've already checked it, or if it isn't passable
             if ((n in visited) or
                 (not passable(n))):
@@ -553,7 +553,7 @@ def reachable_tiles(tilemap,
             continue
         
         # check neighbours
-        for n in tilemap.tile_neighbours(cur):
+        for n in tilemap.neighbours(cur):
             # skip it if it doesn't exist, if we've already checked it, or
             # if it isn't passable
             if ((n in visited) or
