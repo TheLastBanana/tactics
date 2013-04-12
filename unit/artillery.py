@@ -79,5 +79,23 @@ class Artillery(GroundUnit):
         if min_range <= dist and dist <= max_range:
             return True
         return False
+        
+    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+        """
+        Returns whether the given tile is attackable.
+        
+        Overrides this to deal with not being able to hit air units.
+        """        
+        # Get the unit we're going to attack.
+        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
+        
+        # Artillery can't hit an air unit.
+        if u and isinstance(u, unit.air_unit.AirUnit):
+            return False
+            
+        return super().is_attackable(from_tile,
+                                     from_pos,
+                                     to_tile,
+                                     to_pos)
 
 unit.unit_types["Artillery"] = Artillery
