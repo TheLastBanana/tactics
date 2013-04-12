@@ -16,6 +16,9 @@ class WaterUnit(BaseUnit):
         #set unit specific things.
         self.type = "Water Unit"
         
+        #All water units have the same movement sound
+        self.move_sound = "BoatMove"
+        
     def is_passable(self, tile, pos):
         """
         Returns whether or not this unit can move over a certain tile.

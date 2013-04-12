@@ -25,6 +25,9 @@ class Battleship(WaterUnit):
 
         #load the base class
         super().__init__(**keywords)
+        
+        #sounds
+        self.hit_sound = "Artillery"
 
         #set unit specific things.
         self.type = "Battleship"

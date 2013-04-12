@@ -39,6 +39,9 @@ class AirUnit(BaseUnit):
         
         #load the base class
         super().__init__(**keywords)
+        
+        #All air units have the same movement sound
+        self.move_sound = "JetMove"
 
         #set unit specific things.
         self.type = "Air Unit"

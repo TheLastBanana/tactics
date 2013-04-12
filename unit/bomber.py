@@ -29,6 +29,9 @@ class Bomber(AirUnit):
 
         #load the base class
         super().__init__(**keywords)
+        
+        #sounds
+        self.hit_sound = "BombDrop"
 
         #set unit specific things.
         self.type = "Bomber"

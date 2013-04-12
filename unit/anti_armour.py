@@ -27,6 +27,10 @@ class AntiArmour(GroundUnit):
 
         #load the base class
         super().__init__(**keywords)
+        
+        #sounds
+        self.move_sound = "FeetMove"
+        self.hit_sound = "MachineGunFire"
 
         #set unit specific things.
         self.type = "Anti-Armour"
