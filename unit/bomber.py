@@ -20,6 +20,7 @@ class Bomber(AirUnit):
       well-planned bombing runs to ensure they can get back to the
       carrier in time.
     - When firing at ground and water units this unit does more damage.
+    - Can't hit air units.
     """
     sprite = pygame.image.load("assets/bomber.png")
     
@@ -83,5 +84,23 @@ class Bomber(AirUnit):
 
         # Enemy is an air unit, do basic damage
         else: return super().get_damage(target, target_tile)
+        
+    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+        """
+        Returns whether the given tile is attackable.
+        
+        Overrides this to deal with not being able to hit air units.
+        """        
+        # Get the unit we're going to attack.
+        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
+        
+        # Can't bomb an air unit.
+        if u and isinstance(u, unit.air_unit.AirUnit):
+            return False
+            
+        return super().is_attackable(from_tile,
+                                     from_pos,
+                                     to_tile,
+                                     to_pos)
 
 unit.unit_types["Bomber"] = Bomber
