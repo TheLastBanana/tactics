@@ -380,8 +380,9 @@ class BaseUnit(Sprite):
         # Get the unit we're going to attack.
         u = BaseUnit.get_unit_at_pos(to_pos)
         
-        # We can't attack if there's no unit there, or if it's on our team.
-        if not u or u.team == self.team:
+        # We can't attack if there's no unit there, if it's on ourteam,
+        # or if there is some special function defined.
+        if not u or u.team == self.team or not self.can_hit(u):
             return False
             
         return True
@@ -390,6 +391,12 @@ class BaseUnit(Sprite):
         """
         Returns the potential attack damage against a given enemy.
         """
+        # If we can't hit then no damage
+        # This should only really happen when potential damage
+        # is requested
+        if not self.can_hit(target):
+            return 0
+
         # Get the unit's current defense.
         defense =  target.get_defense(target_tile)
         
@@ -398,6 +405,15 @@ class BaseUnit(Sprite):
             return 0
         
         return self.damage - defense
+        
+    def can_hit(self, target_unit):
+        """
+        Determines whether a unit can hit another unit.
+        
+        Really only used to be overridden in subclasses for special
+        effects.
+        """
+        return True
         
     def get_defense(self, tile = None):
         """
