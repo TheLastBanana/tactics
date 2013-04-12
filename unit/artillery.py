@@ -63,6 +63,19 @@ class Artillery(GroundUnit):
         #The tile is passable
         return True
         
+    def can_hit(self, target_unit):
+        """
+        Determines whether a unit can hit another unit.
+        
+        Overrides because artillery can't hit planes.
+        """
+        # If it's an air unit return false
+        if isinstance(target_unit, unit.air_unit.AirUnit):
+            return False
+            
+        # Not an air unit, return true
+        return True
+        
     def is_tile_in_range(self, from_tile, from_pos, to_pos):
         """
         Checks to see if a tile is in attackable range from its current
@@ -80,37 +93,5 @@ class Artillery(GroundUnit):
         if min_range <= dist and dist <= max_range:
             return True
         return False
-        
-    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
-        """
-        Returns whether the given tile is attackable.
-        
-        Overrides this to deal with not being able to hit air units.
-        """        
-        # Get the unit we're going to attack.
-        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
-        
-        # Artillery can't hit an air unit.
-        if u and isinstance(u, unit.air_unit.AirUnit):
-            return False
-            
-        return super().is_attackable(from_tile,
-                                     from_pos,
-                                     to_tile,
-                                     to_pos)
-                                     
-    def get_damage(self, target, target_tile):
-        """
-        Returns the potential attack damage against a given enemy.
-        
-        This overrides the super class function because artillery can't
-        hit air units.
-        """
-        # Artillery can't hit air unit.
-        if isinstance(target, unit.air_unit):
-            return 0
-
-        else:
-            return super().get_damage(target, target_tile)
 
 unit.unit_types["Artillery"] = Artillery

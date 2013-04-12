@@ -86,22 +86,17 @@ class Bomber(AirUnit):
         else: 
             return 0
         
-    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+    def can_hit(self, target_unit):
         """
-        Returns whether the given tile is attackable.
+        Determines whether a unit can hit another unit.
         
-        Overrides this to deal with not being able to hit air units.
-        """        
-        # Get the unit we're going to attack.
-        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
-        
-        # Can't bomb an air unit.
-        if u and isinstance(u, unit.air_unit.AirUnit):
+        Overrides because bombers can't hit planes.
+        """
+        # If it's an air unit return false
+        if isinstance(target_unit, AirUnit):
             return False
             
-        return super().is_attackable(from_tile,
-                                     from_pos,
-                                     to_tile,
-                                     to_pos)
+        # Not an air unit, return true
+        return True
 
 unit.unit_types["Bomber"] = Bomber

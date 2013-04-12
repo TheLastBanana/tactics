@@ -55,37 +55,18 @@ class Tank(GroundUnit):
         
         #The tile is passable
         return True
-        
-    def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
+                                     
+    def can_hit(self, target_unit):
         """
-        Returns whether the given tile is attackable.
+        Determines whether a unit can hit another unit.
         
-        Overrides this to deal with not being able to hit air units.
-        """        
-        # Get the unit we're going to attack.
-        u = unit.base_unit.BaseUnit.get_unit_at_pos(to_pos)
-        
-        # Can't hit an air unit.
-        if u and isinstance(u, unit.air_unit.AirUnit):
+        Overrides because tanks can't hit planes.
+        """
+        # If it's an air unit return false
+        if isinstance(target_unit, unit.air_unit.AirUnit):
             return False
             
-        return super().is_attackable(from_tile,
-                                     from_pos,
-                                     to_tile,
-                                     to_pos)
-                                     
-    def get_damage(self, target, target_tile):
-        """
-        Returns the potential attack damage against a given enemy.
-        
-        This overrides the super class function because tanks can't
-        hit air units.
-        """
-        # Artillery can't hit air unit.
-        if isinstance(target, unit.air_unit):
-            return 0
-
-        else:
-            return super().get_damage(target, target_tile)
+        # Not an air unit, return true
+        return True
 
 unit.unit_types["Tank"] = Tank
