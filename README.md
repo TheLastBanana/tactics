@@ -94,3 +94,45 @@ The following stats are displayed for tiles:
   through 4 such tiles.
 
 **NOTE**: tile bonuses do not apply to aircraft!
+
+Sound Credits
+-------------
+All sounds are from FreeSound.org, released under public domain/Creative Commons
+licenses. As such, they are free to use in this project assuming credit is
+provided.
+
+**Tank fire**
+http://www.freesound.org/people/Cyberkineticfilms/sounds/127845/
+
+**Tank engine**
+http://www.freesound.org/people/Sempoo/sounds/125213/
+
+**Engine start**
+http://www.freesound.org/people/snakebarney/sounds/138099/
+
+**Jeep engine**
+http://www.freesound.org/people/qubodup/sounds/160357/
+
+**Machine gun**
+http://www.freesound.org/people/CGEffex/sounds/101961/
+
+**Anti-armour launch**
+http://www.freesound.org/people/qubodup/sounds/182794/
+
+**Generic explosion**
+http://www.freesound.org/people/sarge4267/sounds/102734/
+
+**Airplane move**
+http://www.freesound.org/people/FreqMan/sounds/135495/
+
+**Anti-armour move**
+http://www.freesound.org/people/mattbronka/sounds/48048/
+
+**Boat move**
+http://www.freesound.org/people/inchadney/sounds/111395/
+
+**Artillery fire**
+http://www.freesound.org/people/qubodup/sounds/184365/
+
+**Bomb drop**
+http://www.freesound.org/people/club%20sound/sounds/104551/
