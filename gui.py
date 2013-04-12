@@ -603,17 +603,6 @@ class GUI(LayeredUpdates):
                 self.sel_unit.rect,
                 SELECT_COLOR)
                 
-        # Outline any units that haven't finished their turns yet
-        #~ for u in unit.base_unit.BaseUnit.active_units:
-            #~ if (u.team == self.cur_team and
-                #~ u != self.sel_unit and
-                #~ (u.turn_state[0] == False or
-                #~ u.turn_state[1] == False)):
-                #~ pygame.gfxdraw.rectangle(
-                    #~ self.screen,
-                    #~ u.rect,
-                    #~ UNMOVED_COLOR)
-                
         # Mark potential targets
         for tile_pos in self._attackable_tiles:
             screen_pos = self.map.screen_coords(tile_pos)
