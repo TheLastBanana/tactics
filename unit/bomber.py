@@ -42,7 +42,7 @@ class Bomber(AirUnit):
         self.defense = 4
         self.bonus_land_damage = 4
         self.bonus_water_damage = 3
-        self.max_fuel = 12
+        self.max_fuel = 10
         self.set_fuel(self.max_fuel)
         self.min_move_distance = 4
         self.hit_effect = effects.Explosion
