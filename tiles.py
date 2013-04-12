@@ -415,14 +415,22 @@ def find_path(graph,
                 start,
                 end,
                 cost = lambda pos: 1,
-                passable = lambda pos: True):
+                passable = lambda pos: True,
+                heuristic = helper.manhattan_dist):
     """
     Returns the path between two nodes as a list of nodes using the A*
     algorithm.
     If no path could be found, an empty list is returned.
+    
     The cost function is how much it costs to leave the given node. This should
     always be greater than or equal to 1, or shortest path is not guaranteed.
-    The passable function returns whether the given node.
+    
+    The passable function returns whether the given node is passable.
+    
+    The heuristic function takes two nodes and computes the distance between the
+    two. Underestimates are guaranteed to provide an optimal path, but it may
+    take longer to compute the path. Overestimates lead to faster path
+    computations, but may not give an optimal path.
     
     Code based on algorithm described in:
     http://www.policyalmanac.org/games/aStarTutorial.htm
@@ -454,7 +462,7 @@ def find_path(graph,
     visited = set()
     
     # associated G and H costs for each tile (tuples of G, H)
-    costs = { start: (0, helper.manhattan_dist(start, end)) }
+    costs = { start: (0, heuristic(start, end)) }
     
     # parents for each tile
     parents = {}
@@ -475,7 +483,7 @@ def find_path(graph,
             if not (n in todo):
                 # we haven't looked at this tile yet, so calculate its costs
                 g = costs[cur][0] + cost(cur)
-                h = helper.manhattan_dist(n, end)
+                h = heuristic(n, end)
                 costs[n] = (g, h)
                 parents[n] = cur
                 todo.update(n, g + h)
