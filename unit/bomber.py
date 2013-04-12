@@ -82,8 +82,9 @@ class Bomber(AirUnit):
                 
             return damage - defense
 
-        # Enemy is an air unit, do basic damage
-        else: return super().get_damage(target, target_tile)
+        # Enemy is an air unit, how did you even manage to get here?
+        else: 
+            return 0
         
     def is_attackable(self, from_tile, from_pos, to_tile, to_pos):
         """
